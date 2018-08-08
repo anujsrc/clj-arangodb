@@ -25,7 +25,7 @@
 
 (defn ^Boolean drop [^ArangoDatabase db] (.drop db))
 
-(defn ^DatabaseEntity get-info [^ArangoDatabase db] (ad/from-entity (.getInfo db)))
+(defn get-info [^ArangoDatabase db] (ad/from-entity (.getInfo db)))
 
 (defn get-document
   "

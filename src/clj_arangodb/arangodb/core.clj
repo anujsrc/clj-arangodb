@@ -38,7 +38,7 @@
 
 (def get-database db)
 
-(defn ^Boolean create-and-get-database
+(defn ^ArangoDatabase create-and-get-database
   ""
   [^ArangoDB conn ^String db-name]
   (do (.createDatabase conn db-name)

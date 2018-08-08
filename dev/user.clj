@@ -21,40 +21,9 @@
 ;; unalias all aliases in ns
 ;; (map (partial ns-unalias *ns*) (keys (ns-aliases *ns*)))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;; (defn f [^ArangoDB db]
-;;   (.util db))
-
-
-
-
-;; (defn serialize [o]
-;;   (let [^ArangoDB db (.build (new ArangoDB$Builder))]
-;;     (. (.util db) serialize o)))
-
-;; (defn deserialize [o class]
-;;   (let [^ArangoDB db (.build (new ArangoDB$Builder))]
-;;     (. (.util db) deserialize o class)))
-
-;; (def conn (ar/connect {:user "test"}))
-;; (def db (ar/create-and-get-database conn "myDB"))
-;; (def coll (d/create-and-get-collection db "myColl"))
+(def conn (ar/connect {:user "test"}))
+(def db (ar/get-database conn "myDB"))
+(def coll (d/get-collection db "myColl"))
 
 ;; (def res (c/insert-document coll {:name "clj-arango" :version "0.0.1"}))
 
