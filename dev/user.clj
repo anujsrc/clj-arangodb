@@ -6,6 +6,7 @@
             [clj-arangodb.arangodb.databases :as d]
             [clj-arangodb.arangodb.collections :as c]
             [clj-arangodb.arangodb.graph :as g]
+            [clj-arangodb.arangodb.aql :as aql]
             [clj-arangodb.velocypack.core :as v]
             [clj-arangodb.arangodb.adapter :as adapter])
   (:import [com.arangodb
@@ -22,8 +23,35 @@
 ;; (map (partial ns-unalias *ns*) (keys (ns-aliases *ns*)))
 
 (def conn (ar/connect {:user "test"}))
-(def db (ar/get-database conn "myDB"))
-(def coll (d/get-collection db "myColl"))
+(def db (ar/get-database conn "webapp"))
+
+
+(def q1 (aql/parse-aql
+         [:FOR ["v"] {:start "\"Characters/536203\""
+                      :type :any ;; :inbound :any
+                      :depth [2 2]
+                      :unique {:vertices :global}
+                      :collections ["ChildOf"]}
+          [:RETURN "v.name"]]))
+
+(def q2 (aql/parse-aql
+         [:FOR ["c" "Characters"]
+          [:FILTER ['== "c.name" "\"Ned\""]]
+          [:FOR ["v" "e" {:start "c"
+                          :type :inbound
+                          :depth [1 1]
+                          :collections ["ChildOf"]}]
+           [:RETURN "v.name"]]]))
+
+(def q3 (aql/parse-aql
+         (aql/FOR ["c" "Characters"]
+                  (aql/FILTER ['== "c.name" "\"Ned\""])
+                  (aql/FOR ["v" "e" {:start "c"
+                                     :type :inbound
+                                     :depth [1 1]
+                                     :collections ["ChildOf"]}]
+                           (aql/RETURN "v.name")))))
+
 
 ;; (def res (c/insert-document coll {:name "clj-arango" :version "0.0.1"}))
 

@@ -23,6 +23,15 @@
      (when-not (d/exists? ~db)
        (a/create-database conn# ~label))
      ~@body
+     (a/shutdown conn#)))
+
+(defmacro with-temp-db
+  [[db label] & body]
+  `(let [conn# (a/connect {:user "test"})
+         ~db (a/db conn# ~label)]
+     (when-not (d/exists? ~db)
+       (a/create-database conn# ~label))
+     ~@body
      (try (d/drop ~db)
           (catch Exception _#))
      (a/shutdown conn#)))

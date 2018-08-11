@@ -5,17 +5,17 @@
             [clojure.test :refer :all]))
 
 (deftest exists-test
-  (h/with-db
+  (h/with-temp-db
     [db "mahdb"]
     (is (d/exists? db))))
 
 (deftest drop-test
-  (h/with-db
+  (h/with-temp-db
     [db "mahdb"]
     (is (d/drop db))))
 
 (deftest get-info-test
-  (h/with-db
+  (h/with-temp-db
     [db "mahdb"]
     (let [info (d/get-info db)]
       (is (= com.arangodb.entity.DatabaseEntity
@@ -24,7 +24,7 @@
              (set (keys info)))))))
 
 (deftest collection-test
-  (h/with-db
+  (h/with-temp-db
     [db "mahdb"]
     (let [coll (d/create-collection db "mahcoll")]
       (is (= com.arangodb.entity.CollectionEntity
@@ -37,7 +37,7 @@
                    "mahcoll"))))
 
 (deftest collection-exists-test
-  (h/with-db [db "some_database"]
+  (h/with-temp-db [db "some_database"]
     (let [label "some_collection"]
       (d/create-collection db label)
       (is (contains? (set (d/get-collection-names db)) label))

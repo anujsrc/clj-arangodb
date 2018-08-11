@@ -2,7 +2,8 @@
   (:require [clj-arangodb.velocypack.core :as vpack]
             [clj-arangodb.arangodb.graph :as graph]
             [clj-arangodb.arangodb.adapter :as ad]
-            [clj-arangodb.arangodb.options :as options])
+            [clj-arangodb.arangodb.options :as options]
+            [clj-arangodb.arangodb.aql :as aql])
   (:import [com.arangodb
             ArangoDB
             ArangoCursor
@@ -105,7 +106,7 @@
 
 (defn ^ArangoCursor query
   ;; can pass java.util.Map / java.util.List as well
-  ([^ArangoDatabase db ^String query-str]
+  ([^ArangoDatabase db query-str]
    (query db query-str nil nil ad/*default-doc-class*))
-  ([^ArangoDatabase db ^String query-str bindvars ^AqlQueryOptions options ^Class as]
-   (.query db query-str bindvars (options/build AqlQueryOptions options) as)))
+  ([^ArangoDatabase db query-str bindvars ^AqlQueryOptions options ^Class as]
+   (.query db (aql/serialize query-str) bindvars (options/build AqlQueryOptions options) as)))
