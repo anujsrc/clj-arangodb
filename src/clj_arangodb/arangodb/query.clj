@@ -6,3 +6,6 @@
 
 (defn ->vec [^ArangoCursor c]
   (vec (map ad/deserialize-doc (.asListRemaining c))))
+
+(defn has-next? [^ArangoCursor c]
+  ^Boolean (.hasNext c))

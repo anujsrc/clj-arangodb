@@ -75,10 +75,11 @@
   (ad/from-entity (.removeEdgeDefinition graph name)))
 
 (defn ^VertexEntity insert-vertex
-  ([^ArangoVertexCollection coll doc]
+  ([^ArangoVertexCollection coll ^Object doc]
    (ad/from-entity (.insertVertex coll (ad/serialize-doc doc))))
-  ([^ArangoEdgeCollection coll doc ^VertexCreateOptions options]
+  ([^ArangoVertexCollection coll ^Object doc ^VertexCreateOptions options]
    (ad/from-entity (.insertVertex coll (ad/serialize-doc doc)
+                                  ^VertexCreateOptions
                                   (options/build VertexCreateOptions options)))))
 
 (defn get-vertex
@@ -86,35 +87,42 @@
    (get-vertex coll key ad/*default-doc-class*))
   ([^ArangoVertexCollection coll ^String key ^Class as]
    (ad/deserialize-doc (.getVertex coll key as)))
-  ([^ArangoEdgeCollection coll ^String key ^Class as ^DocumentReadOptions options]
-   (ad/deserialize-doc (.getVertex coll key as (options/build DocumentReadOptions options)))))
+  ([^ArangoVertexCollection coll ^String key ^Class as ^DocumentReadOptions options]
+   (ad/deserialize-doc (.getVertex coll key as
+                                   ^DocumentReadOptions
+                                   (options/build DocumentReadOptions options)))))
 
-(defn ^VertexUpdateEntity replace-vertex
-  ([^ArangoVertexCollection coll ^String key ^Object doc]
+(defn replace-vertex
+  (^VertexUpdateEntity
+   [^ArangoVertexCollection coll ^String key ^Object doc]
    (ad/from-entity (.replaceVertex coll key (ad/serialize-doc doc))))
-  ([^ArangoVertexCollection coll ^String key ^Object doc ^VertexUpdateOptions options]
+  (^VertexUpdateEntity
+   [^ArangoVertexCollection coll ^String key ^Object doc ^VertexUpdateOptions options]
    (ad/from-entity (.replaceVertex coll key (ad/serialize-doc doc)
                                    (options/build VertexUpdateOptions options)))))
 
-(defn ^VertexUpdateEntity update-vertex
-  ([^ArangoVertexCollection coll ^String key ^Object doc]
+(defn update-vertex
+  (^VertexUpdateEntity
+   [^ArangoVertexCollection coll ^String key ^Object doc]
    (ad/from-entity (.updateVertex coll key (ad/serialize-doc doc))))
-  ([^ArangoVertexCollection coll ^String key ^Object doc ^VertexUpdateOptions options]
+  (^VertexUpdateEntity
+   [^ArangoVertexCollection coll ^String key ^Object doc ^VertexUpdateOptions options]
    (ad/from-entity (.updateVertex coll key (ad/serialize-doc doc)
                                   (options/build VertexUpdateOptions options)))))
 
 (defn delete-vertex
   ;; void
-  ([^ArangoVertexCollection coll ^String key ^Object doc]
-   (.deleteVertex coll key (ad/serialize-doc doc)))
-  ([^ArangoVertexCollection coll ^String key ^Object doc ^VertexDeleteOptions options]
-   (.deleteVertex coll key (ad/serialize-doc doc)
-                  (options/build VertexDeleteOptions options))))
+  ([^ArangoVertexCollection coll ^String key]
+   (.deleteVertex coll key))
+  ([^ArangoVertexCollection coll ^String key ^VertexDeleteOptions options]
+   (.deleteVertex coll key (options/build VertexDeleteOptions options))))
 
-(defn ^EdgeEntity insert-edge
-  ([^ArangoEdgeCollection coll doc]
+(defn insert-edge
+  (^EdgeEntity
+   [^ArangoEdgeCollection coll doc]
    (ad/from-entity (.insertEdge coll (ad/serialize-doc doc))))
-  ([^ArangoEdgeCollection coll doc ^EdgeCreateOptions options]
+  (^EdgeEntity
+   [^ArangoEdgeCollection coll doc ^EdgeCreateOptions options]
    (ad/from-entity (.insertEdge coll (ad/serialize-doc doc)
                                 (options/build EdgeCreateOptions options)))))
 
@@ -143,8 +151,7 @@
 
 (defn delete-edge
   ;; void
-  ([^ArangoEdgeCollection coll ^String key ^Object doc]
-   (.deleteEdge coll key (ad/serialize-doc doc)))
-  ([^ArangoEdgeCollection coll ^String key ^Object doc ^EdgeDeleteOptions options]
-   (.deleteEdge coll key (ad/serialize-doc doc)
-                (options/build EdgeDeleteOptions options))))
+  ([^ArangoEdgeCollection coll ^String key]
+   (.deleteEdge coll key))
+  ([^ArangoEdgeCollection coll ^String key ^EdgeDeleteOptions options]
+   (.deleteEdge coll key (options/build EdgeDeleteOptions options))))

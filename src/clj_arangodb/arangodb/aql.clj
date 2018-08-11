@@ -6,7 +6,7 @@
 
 ;;; janky handling for option maps for graphs
 
-(defn parse-traversal-options [{bfs :bfs {v :vertices e :edges} :unique :as options}]
+(defn- parse-traversal-options [{bfs :bfs {v :vertices e :edges} :unique :as options}]
   (if (empty? options)
     ""
     (format "OPTIONS {%s%s%s}"
@@ -20,7 +20,7 @@
               ""
               (str "uniqueEdges : \"" (name e) "\"")))))
 
-(defn parse-graph-or-collections [graph collections]
+(defn- parse-graph-or-collections [graph collections]
   (if graph
     (str "GRAPH " (serialize graph))
     (str/join "," (for [c collections]
@@ -29,7 +29,7 @@
                       (str (str/upper-case (name (first c))) " "
                            (serialize (second c))))))))
 
-(defn parse-shortest-path
+(defn- parse-shortest-path
   [{:keys [type start shortest-path graph collections options]
     :as traversal}]
   (let [type (str/upper-case (name type))]
@@ -40,7 +40,7 @@
             (parse-graph-or-collections graph collections)
             (parse-traversal-options options))))
 
-(defn format-aql-traversal
+(defn- format-aql-traversal
   [o] (if-not (map? o)
         (serialize o)
         (let [{:keys [depth type start shortest-path graph collections options]} o]

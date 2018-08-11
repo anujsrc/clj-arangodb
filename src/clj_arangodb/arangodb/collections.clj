@@ -1,7 +1,10 @@
 (ns clj-arangodb.arangodb.collections
   (:require [clj-arangodb.arangodb.adapter :as ad]
             [clj-arangodb.arangodb.options :as options])
-  (:import [com.arangodb
+  (:import [java.util
+            ArrayList
+            Collection]
+           [com.arangodb
             ArangoCollection]
            [com.arangodb.entity
             CollectionEntity
@@ -28,33 +31,33 @@
             DocumentImportOptions])
   (:refer-clojure :exclude [drop load]))
 
-(defn ^CollectionEntity get-info [^ArangoCollection coll]
+(defn get-info ^CollectionEntity [^ArangoCollection coll]
   (ad/from-entity (.getInfo coll)))
 
-(defn ^CollectionPropertiesEntity get-properties [^ArangoCollection coll]
+(defn get-properties ^CollectionPropertiesEntity [^ArangoCollection coll]
   (ad/from-entity (.getProperties coll)))
 
-(defn ^CollectionRevisionEntity get-revision [^ArangoCollection coll]
+(defn get-revision ^CollectionRevisionEntity [^ArangoCollection coll]
   (ad/from-entity (.getRevision coll)))
 
-(defn ^Boolean exists? [^ArangoCollection coll]
+(defn exists? ^Boolean [^ArangoCollection coll]
   (.exists coll))
 
-(defn ^CollectionEntity rename [^ArangoCollection coll ^String new-name]
+(defn rename ^CollectionEntity [^ArangoCollection coll ^String new-name]
   (ad/from-entity (.rename coll new-name)))
 
-(defn ^CollectionEntity load [^ArangoCollection coll]
+(defn load ^CollectionEntity [^ArangoCollection coll]
   (ad/from-entity (.load coll)))
 
-(defn ^CollectionEntity unload [^ArangoCollection coll]
+(defn unload ^CollectionEntity [^ArangoCollection coll]
   (ad/from-entity (.unload coll)))
 
-(defn ^CollectionEntity change-properties
+(defn change-properties ^CollectionEntity
   [^ArangoCollection coll ^CollectionPropertiesOptions options]
   (ad/from-entity (.changeProperties coll (options/build CollectionPropertiesOptions options))))
 
-(defn ^CollectionEntity truncate [^ArangoCollection coll]
-  (ad/from-entity (.tuncate coll)))
+(defn truncate ^CollectionEntity [^ArangoCollection coll]
+  (ad/from-entity (.truncate coll)))
 
 (defn drop ;;void
   ([^ArangoCollection coll] (.drop coll))
@@ -119,7 +122,7 @@
   ([^ArangoCollection coll keys]
    (get-documents coll keys ad/*default-doc-class*))
   ([^ArangoCollection coll keys ^Class as]
-   (ad/from-entity (.getDocuments coll (java.util.ArrayList. keys) as))))
+   (ad/from-entity (.getDocuments coll (ArrayList. ^Collection keys) as))))
 
 (defn ^DocumentCreateEntity insert-document
   ([^ArangoCollection coll ^Object doc]
@@ -130,17 +133,20 @@
 
 (defn ^MultiDocumentEntity insert-documents
   ([^ArangoCollection coll docs]
-   (ad/from-entity (.insertDocuments coll (java.util.ArrayList.
-                                           (map ad/serialize-doc docs)))))
+   (ad/from-entity (.insertDocuments coll (ArrayList. ^Collection
+                                                      (map ad/serialize-doc docs)))))
   ([^ArangoCollection coll docs ^DocumentCreateOptions options]
-   (ad/from-entity (.insertDocuments coll (java.util.ArrayList. (map ad/serialize-doc docs))
+   (ad/from-entity (.insertDocuments coll (ArrayList. ^Collection (map ad/serialize-doc docs))
                                      (options/build DocumentCreateOptions options)))))
 
 (defn ^DocumentImportEntity import-documents
-  ([^ArangoCollection coll docs]
+  ([^ArangoCollection coll ^Collection docs]
    (ad/from-entity (.importDocuments coll docs)))
-  ([^ArangoCollection coll docs ^DocumentImportOptions options]
-   (ad/from-entity (.importDocuments coll docs (options/build DocumentImportOptions options)))))
+  ([^ArangoCollection coll ^Collection docs ^DocumentImportOptions options]
+   (ad/from-entity (.importDocuments coll
+                                     docs
+                                     ^DocumentImportOptions
+                                     (options/build DocumentImportOptions options)))))
 
 (defn ^DocumentUpdateEntity update-document
   ([^ArangoCollection coll ^String key ^Object doc]
@@ -151,9 +157,9 @@
 
 (defn ^MultiDocumentEntity update-documents
   ([^ArangoCollection coll docs]
-   (ad/from-entity (.updateDocuments coll (java.util.ArrayList. (map ad/serialize-doc docs)))))
+   (ad/from-entity (.updateDocuments coll (ArrayList. ^Collection (map ad/serialize-doc docs)))))
   ([^ArangoCollection coll docs ^DocumentUpdateOptions options]
-   (ad/from-entity (.updateDocuments coll (java.util.ArrayList. (map ad/serialize-doc docs))
+   (ad/from-entity (.updateDocuments coll (ArrayList. ^Collection (map ad/serialize-doc docs))
                                      (options/build DocumentUpdateOptions options)))))
 
 (defn ^DocumentUpdateEntity replace-document
@@ -164,9 +170,9 @@
 
 (defn ^MultiDocumentEntity replace-documents
   ([^ArangoCollection coll docs]
-   (ad/from-entity (.replaceDocuments coll (java.util.ArrayList. (map ad/serialize-doc docs)))))
+   (ad/from-entity (.replaceDocuments coll (ArrayList. ^Collection (map ad/serialize-doc docs)))))
   ([^ArangoCollection coll docs ^DocumentReplaceOptions options]
-   (ad/from-entity (.replaceDocuments coll (java.util.ArrayList. (map ad/serialize-doc docs))
+   (ad/from-entity (.replaceDocuments coll (ArrayList. ^Collection (map ad/serialize-doc docs))
                                       (options/build DocumentReplaceOptions options)))))
 
 (defn ^DocumentDeleteEntity delete-document
@@ -177,7 +183,7 @@
 
 (defn ^MultiDocumentEntity delete-documents
   ([^ArangoCollection coll keys]
-   (ad/from-entity (.deleteDocuments coll (java.util.ArrayList. keys))))
+   (ad/from-entity (.deleteDocuments coll (ArrayList. ^Collection keys))))
   ([^ArangoCollection coll keys ^Class as ^DocumentDeleteOptions options]
-   (ad/from-entity (.deleteDocuments coll (java.util.ArrayList. keys) as
+   (ad/from-entity (.deleteDocuments coll (ArrayList. ^Collection keys) as
                                      (options/build DocumentDeleteOptions options)))))

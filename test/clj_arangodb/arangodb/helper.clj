@@ -29,6 +29,8 @@
   [[db label] & body]
   `(let [conn# (a/connect {:user "test"})
          ~db (a/db conn# ~label)]
+     (try (d/drop ~db)
+          (catch Exception _#))
      (when-not (d/exists? ~db)
        (a/create-database conn# ~label))
      ~@body
