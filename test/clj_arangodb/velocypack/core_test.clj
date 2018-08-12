@@ -11,3 +11,10 @@
     (is (= (v/pack data2) (v/pack data2)))
     (is (= (v/pack data3) (v/pack data3)))
     (is (= (v/pack data4) (v/pack data4)))))
+
+(deftest can-compare-equality
+  (let [data {:one 1
+              :yes true
+              :vec [1 2 3 4 5]
+              :obj {:k1 "hello" :k2 {:cool false}}}]
+    (is (= (v/unpack (v/pack data) data)))))
