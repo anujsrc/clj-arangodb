@@ -111,7 +111,9 @@
 
 (defn query ^ArangoCursor
   ;; can pass java.util.Map / java.util.List as well
-  ([^ArangoDatabase db query-str]
+  ([^ArangoDatabase db ^String query-str]
    (query db query-str nil nil ad/*default-doc-class*))
+  ([^ArangoDatabase db ^String query-str ^AqlQueryOptions options]
+   (.query db (aql/serialize query-str) ad/*default-doc-class*))
   ([^ArangoDatabase db query-str bindvars ^AqlQueryOptions options ^Class as]
    (.query db (aql/serialize query-str) bindvars (options/build AqlQueryOptions options) as)))
