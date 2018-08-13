@@ -7,7 +7,7 @@
 
 (def ^:const game-of-thrones-db-label "gameOfThronesDB")
 
-(def characters
+(def ^:private characters
   (adapter/double-quote-strings
    [{:name "Robert" :surname "Baratheon" :alive false :traits ["A" "H" "C"]}
     {:name "Jaime" :surname "Lannister" :alive true :age 36 :traits ["A" "F" "B"]}
@@ -53,7 +53,7 @@
     {:name "Roose" :surname "Bolton" :alive true :traits ["H" "E" "F" "A"]}
     {:name "The High Sparrow" :alive true :traits ["H" "M" "F" "O"]}]))
 
-(def traits
+(def ^:private traits
   (adapter/double-quote-strings
    [{:_key "A" :en "strong" :de "stark"}
     {:_key "B" :en "polite" :de "freundlich"}
@@ -74,7 +74,7 @@
     {:_key "Q" :en "mighty" :de "mächtig"}
     {:_key "R" :en "weak" :de "schwach" }]))
 
-(def child-of
+(def ^:private child-of
   (adapter/double-quote-strings
    [{:parent {:name "Ned" :surname "Stark"}
      :child {:name "Robb" :surname "Stark"}}
@@ -105,13 +105,13 @@
     {:parent {:name "Jaime" :surname "Lannister"}
      :child {:name "Joffrey" :surname "Baratheon"}}]))
 
-(defn drop-db []
+(defn- drop-db [label]
   (h/with-db
-    [db game-of-thrones-db-label]
+    [db label]
     (d/drop db)))
 
-(defn init-db []
-  (drop-db)
+(defn init-game-of-thrones-db []
+  (drop-db game-of-thrones-db-label)
   (h/with-db
     [db game-of-thrones-db-label]
     (d/create-collection db "Characters")

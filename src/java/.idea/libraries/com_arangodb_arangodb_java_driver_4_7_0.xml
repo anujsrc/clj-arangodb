@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="com.arangodb:arangodb-java-driver:4.7.0" type="repository">
+    <properties maven-id="com.arangodb:arangodb-java-driver:4.7.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/arangodb/arangodb-java-driver/4.7.0/arangodb-java-driver-4.7.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/arangodb/velocypack/1.3.0/velocypack-1.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.9.5/jackson-core-2.9.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.13/slf4j-api-1.7.13.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -16,9 +16,11 @@
   ([^Object o key-fn]
    (let [^VPackBuilder builder (new VPackBuilder)]
      (.slice
-      (if (map? o)
-        ^VPackBuilder (build-map (.add builder ^ValueType ValueType/OBJECT) o key-fn)
-        ^VPackBuilder (build-array (.add builder ^ValueType ValueType/ARRAY) o key-fn))))))
+      (cond (map? o)
+            ^VPackBuilder (build-map (.add builder ^ValueType ValueType/OBJECT) o key-fn)
+            (sequential? o)
+            ^VPackBuilder (build-array (.add builder ^ValueType ValueType/ARRAY) o key-fn)
+            :else (.add builder o))))))
 
 (defn- build-array [^VPackBuilder builder xs key-fn]
   (.close ^VPackBuilder
@@ -40,8 +42,9 @@
                (cond
                  (map? v) (build-map (.add ^VPackBuilder b
                                            s ^ValueType ValueType/OBJECT) v key-fn)
-                 (sequential? v) (build-array (.add ^VPackBuilder b
-                                                    s ^ValueType ValueType/ARRAY) v key-fn)
+                 (sequential? v)
+                 (build-array (.add ^VPackBuilder b
+                                    s ^ValueType ValueType/ARRAY) v key-fn)
                  :else (.add ^VPackBuilder b s v)))) builder o)))
 
 (defn unpack
@@ -53,8 +56,8 @@
   ([^VPackSlice slice] (unpack slice utils/str->key))
   ([^VPackSlice slice key-fn]
    (cond
-     (.isNull slice)    nil
-     (.isString slice)  (.getAsString slice)
+     (.isNull slice) nil
+     (.isString slice) (.getAsString slice)
      (.isInteger slice) (.getAsLong slice)
      (.isBoolean slice) (.getAsBoolean slice)
      (.isObject slice)
