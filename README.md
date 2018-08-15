@@ -24,7 +24,7 @@ using clj-arangodb we are doing exactly the same thing under the hood.
 ```
 ## Databases and Collections
 
-The namespaces are partitioned accorting to the dispatch object, so for example all functions in the `databases` namespace take a `com.arangodb.ArangoDatabse` as the first parameter.
+The namespaces are partitioned according to the dispatch object, so for example all functions in the `databases` namespace take a `com.arangodb.ArangoDatabse` as the first parameter.
 
 ## Return Values
 
