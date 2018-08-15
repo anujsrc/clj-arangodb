@@ -4,44 +4,46 @@
 
 Arangodb is a multi-modal database.
 
-The maintainers of arangodb provide a java driver for communicating with an arangodb server.
-This library provides clojure developers a thin (and incomplete) wrapper of that interface.
-Much like monger, the java implementation is still visible.
+The maintainers of arangodb provide a [java driver](https://github.com/arangodb/arangodb-java-driver) for communicating with an arangodb server.
+This library provides clojure developers a thin wrapper of that interface.
 
-Functions are lispy versions of their java counterparts.
-Options are passed as maps - with keywords written in `:cammelCase` - for example `{:someOption "a string" :anotherOption ["192.168.1.1", 8888]}`
+Functions are lispy versions of their java counterparts - for example the function `create-database` in the `core` namespace is a wrapper for the method `createDatabase`.
+Options can be passed either as objects such as `com.arangodb.model.DocumentReadOptions` or clojure maps. When a map is passed the keywords should be in `:cammelCase` - for example `{:someOption "a string" :anotherOption ["192.168.1.1", 8888]}`
 For more information about what constitutes a valid option for a method you must consult the java api documentation.
 
-This wrapper exposes most of the available methods -
-If we look at how the java code is used, in this example a new connecton is being made to a server.
+## Connecting
+
+First we show a typical java call to create a connection object:
 ```java
 ArangoDB arangoDB = new ArangoDB.Builder().useProtocol(Protocol.VST).host("192.168.182.50", 8888).build();
 ```
-In the clojure version we are doing exactly the same thing under the hood.
+using clj-arangodb we are doing exactly the same thing under the hood.
 ```clojure
 (import 'com.arangodb.Protocol)
 (def arango-db (connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
 ```
-## One very important namespace
-the namespace `clj-arangodb.arangodb.adapter` contains 3 multimethods
+## Databases and Collections
+
+The namespaces are partitioned accorting to the dispatch object, so for example all functions in the `databases` namespace take a `com.arangodb.ArangoDatabse` as the first parameter.
+
+## Return Values
+
+The namespace `clj-arangodb.arangodb.adapter` contains 3 multimethods
 ```clojure
 (defmulti serialize-doc class)
 (defmulti deserialize-doc class)
 (defmulti from-entity class)
 ```
 On top of that there is 1 dynamic var `*default-doc-class*` that is bound to the class `com.arangodb.velocypack.VPackSlice`
-
 To understand the design of this library it is important to undererstand a little bit about how the java client works.
 
-When you want to send data to ArangoDB the data can be in `json` `POJO` (plain old Java object) or a format called a `VPackSlice`
-VPackSlices are optimised for fast transmition (by default the java driver uses something called velocy-streams which as you might
-have guessed have a lot to do with VPackSlices or *velocy packs*.
+When you want to send data to ArangoDB the data can be in `json` `POJO` (plain old Java object) or a format called a `VPackSlice`. VPackSlices are optimised for fast transmition (by default the java driver uses something called velocy-streams which as you might have guessed have a lot to do with VPackSlices or *velocy packs*.
+
+While the ArangoDB Java driver allows for custom serializer/deserialiser modules - as of now there is not one for Clojure datastructures - it is on my list of things to do!
 
 As clojurists we like to work with maps and it gets really annoying having to wrap all of your calls in some "to-string" -
 However, as there are multiple options in how data can be sent, I have tried to be as un-opinionated as possible.
 I also didn't want to have any dependencies (so no external json libs - pjson is fast but its up to you).
-
-While the ArangoDB Java driver allows for custom serializer/deserialiser modules - as of now there is not one for Clojure datastructures - it is on my list of things to do!
 
 lets see what happens
 ```clojure
