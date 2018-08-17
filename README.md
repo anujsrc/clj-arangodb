@@ -12,8 +12,6 @@ This library provides clojure developers a thin (and incomplete) wrapper of that
 - Unopinionated
 - Idiomatic (whatever that means)
 
-## Examples
-
 ## Lets connect
 
 So... you've installed arangodb... fired it up... added `clj-arangodb` to your project... now what?
@@ -59,7 +57,7 @@ Now that we have a collection, lets add some *stuff*.
 
 ## Adding documents
 
-# Document positions
+## Document positions
 
 As a rule funtions that accept documents/keys/ids take them as their last argument - this is **not** inkeeping with the underlying methods.
 Connection (database/collection) objects appear in position 1 (standard) and then arguments are in reverse order.
