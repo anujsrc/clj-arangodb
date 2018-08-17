@@ -11,10 +11,36 @@ This library provides clojure developers a thin (and incomplete) wrapper of that
 
 ## Examples
 
+## Lets connect
+
+So... you've installed arangodb... fired it up... added `clj-arangodb` to your project... now what?
+
+Creating a connection is as simple as passing a map.
+
+Connecting using the Java client might look something like this:
+
+```java
+ArangoDB arangoDB = new ArangoDB.Builder().useProtocol(Protocol.VST).host("192.168.182.50", 8888).build();
+```
+
+Nasty! This library abstracts away inner classes and calls to `build` - just pass a map.
+In this example the keys of the map corrspond to methods on the ArangoDB.Builder object.
+If a method has arity > 1 then the arguments are placed in a vector.
+
+```clojure
+(import 'com.arangodb.Protocol)
+(def arango-db (connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
+```
+
+This approach will be explained slightly more when we look at passing options.
+
+
 ## An introduction to Options
 
 The majority of methods allow for an optional **Options** object to be passed.
 The constructors are found under `com.arangodb.model.*` in the java driver.
+
+Options are used in a very similar way to how we created a connection.
 
 Information can be found [here](https://docs.arangodb.com/devel/Drivers/Java/Reference/)
 
