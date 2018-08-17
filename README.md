@@ -24,12 +24,13 @@ ArangoDB arangoDB = new ArangoDB.Builder().useProtocol(Protocol.VST).host("192.1
 ```
 
 Nasty! This library abstracts away inner classes and calls to `build` - just pass a map.
-In this example the keys of the map corrspond to methods on the ArangoDB.Builder object.
+In this example the keys of the map correspond to methods on the ArangoDB.Builder object.
 If a method has arity > 1 then the arguments are placed in a vector.
 
 ```clojure
+(require '[clj-arangodb.arangodb.core :as arango])
 (import 'com.arangodb.Protocol)
-(def arango-db (connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
+(def arango-db (arango/connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
 ```
 
 This approach will be explained slightly more when we look at passing options.
