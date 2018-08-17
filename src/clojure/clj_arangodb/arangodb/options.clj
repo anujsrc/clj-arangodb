@@ -1,12 +1,12 @@
 (ns clj-arangodb.arangodb.options)
 
-(defn class->symbol [^Class c]
+(defn- class->symbol [^Class c]
   (symbol (.substring (.toString c) 6)))
 
 (defn- fn-builder
-  "given a map entry that represents a method call where the key (keyword)
-  is the method name and the `val` are args (modulo the implicit object)
-  returns a partial function that takes a single `object` argument."
+  ;; given a map entry that represents a method call where the key (keyword)
+  ;; is the method name and the `val` are args (modulo the implicit object)
+  ;; returns a partial function that takes a single `object` argument.
   ;; to ensure that objects can be passed as args, we need to create a
   ;; partial function so that we do not need to eval any args directly!
   ;; Arguments single multiple arguments should be in a seq
@@ -21,8 +21,8 @@
     (apply partial f args)))
 
 (defn build
-  "given a class name and map of options create a sequence of function calls
-  and call them sequentially using a new `object` of class `class`"
+  "takes a `class` and `map` of options.
+  creates and calls a sequence of functions a new `object` of class `class`"
   [class options]
   (if (map? options)
     (reduce (fn [acc f]
