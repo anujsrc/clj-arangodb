@@ -59,7 +59,7 @@ Now that we have a collection, lets add some *stuff*.
 # Document positions
 
 As a rule funtions that accept documents/keys/ids take them as their last argument - this is **not** inkeeping with the underlying methods.
-Take for example
+Connection (database/collection) objects appear in position 1 (standard) and then arguments are in reverse order.
 
 ```clojure
 (defn insert-document ^DocumentCreateEntity
@@ -67,6 +67,14 @@ Take for example
    (.insertDocument coll doc))
   ([^ArangoCollection coll ^DocumentCreateOptions options ^Object doc]
    (.insertDocument coll doc (options/build DocumentCreateOptions options))))
+```
+
+```clojure
+(defn get-document
+  ([^ArangoCollection coll ^Class as ^String key]
+   (.getDocument coll key as))
+  ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
+   (.getDocument coll key as (options/build DocumentReadOptions options))))
 ```
 
 This is a consious decision as it allows for use of the `->>` (thread last) macro.
@@ -95,10 +103,24 @@ Consider for example the case when you want to call
 The silent option means that no information will be returned - making such an implict convertsion superfluous.
 
 
+
 Lets assume that we have a document will use the function `collections/insert-document`
 
+## Vpack
 
-
+```clojure
+user> (defrecord Person [name surname age])
+user.Person
+user> (->Person "a" "b" 23)
+#user.Person{:name "a", :surname "b", :age 23}
+user> (vpack/pack (->Person "a" "b" 23))
+#object[com.arangodb.velocypack.VPackSlice 0x4b0b8826 "{\"name\":\"a\",\"surname\":\"b\",\"age\":23}"]
+user> (-> (->Person "a" "b" 23)
+      	  vpack/pack
+          vpack/unpack
+          map->Person)
+#user.Person{:name "a", :surname "b", :age 23}
+```
 
 ## An introduction to Options
 

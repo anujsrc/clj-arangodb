@@ -8,6 +8,7 @@
             [clj-arangodb.arangodb.graph :as graph]
             [clj-arangodb.velocypack.core :as vpack]
             [clj-arangodb.arangodb.helper :as h]
+            [clj-arangodb.arangodb.accessors :as accessors]
             [clj-arangodb.arangodb.adapter :as adapter])
   (:import [com.arangodb
             ArangoCollection
