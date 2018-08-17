@@ -54,10 +54,20 @@ We will not bother with any options here
 ```
 Now that we have a collection, lets add some *stuff*.
 
-## Creating Databases and Collections
+## Adding documents
+
+# What is a document
+
+A document is a mapping from keys to vals - by default the java driver allows the user to pass
+the following
+
+- `(collections/insert-document my-json-object)`
+- `(collections/insert-document my-vpack-slice-object)`
+- `(collections/insert-document my-plain-old-java-object)`
+
+Lets assume that we have a document will use the function `collections/insert-document`
 
 
-The `databases` namespace contains all functions (methods) that take a database object
 
 
 ## An introduction to Options
