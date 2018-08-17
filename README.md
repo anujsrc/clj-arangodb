@@ -2,12 +2,15 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/beoliver/clj-arangodb.svg)](https://clojars.org/beoliver/clj-arangodb)
 
-[Arangodb](https://docs.arangodb.com/devel/Drivers/Java/Reference/) is a multi-modal database.
-yo
-The maintainers of arangodb provide a java driver for communicating with an arangodb server.
+Arangodb is a multi-modal database.
+The maintainers of arangodb provide a [java driver](https://docs.arangodb.com/devel/Drivers/Java/Reference/) for communicating with an arangodb server.
 This library provides clojure developers a thin (and incomplete) wrapper of that interface.
 
 ## Philosophy
+
+- Simple
+- Unopinionated
+- Idiomatic (whatever that means)
 
 ## Examples
 
