@@ -37,3 +37,6 @@ This has the same effect as:
     (.returnNew true)
     (.waitForSync true))
 ```
+
+As this is a pain to work with, every function that allows for options to be passed performs this behind the scenes -
+If you are after performance and want to re-use options, then just create them explicity and pass them to the functions.
