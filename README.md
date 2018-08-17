@@ -20,23 +20,20 @@ Information can be found [here](https://docs.arangodb.com/devel/Drivers/Java/Ref
 
 Lets assume that we want to insert a document - looking at the [documentation](https://docs.arangodb.com/devel/Drivers/Java/Reference/Collection/DocumentManipulation.html) we see that the method `insertDocument` takes an optional `DocumentCreateOptions`.
 
-Lets see what happens if we pass it an empty map...
+The `options` namespace provides a single function `build`
+
+`(build class options)`
+
+If `options` is a map then the **keys** are treated as methods and the `vals` treated as arguments.
+If `options` is **not** a map then then it returns `options`.
 
 ```clojure
-user> (require '[clj-arangodb.arangodb.options :as options])
-nil
-user> (def opts (options/build com.arangodb.model.DocumentCreateOptions {}))
-#'user/opts
-user> opts
+user> (options/build com.arangodb.model.DocumentCreateOptions {:returnNew true :waitForSync true})
 #object[com.arangodb.model.DocumentCreateOptions 0x709af356 "com.arangodb.model.DocumentCreateOptions@709af356"]
-;; the function `bean` lets us see the fields.
-user> (bean opts)
-{:class com.arangodb.model.DocumentCreateOptions, :overwrite nil, :returnNew nil, :returnOld nil, :silent nil, :waitForSync nil}
 ```
-According to the documentation, these are all boolean flags - so lets try and set `returnNew`
-
+This has the same effect as:
 ```clojure
-user> (bean (options/build com.arangodb.model.DocumentCreateOptions {:returnNew true}))
-{:class com.arangodb.model.DocumentCreateOptions, :overwrite nil, :returnNew true, :returnOld nil, :silent nil, :waitForSync nil}
+(-> (new com.arangodb.model.DocumentCreateOptions)
+    (.returnNew true)
+    (.waitForSync true))
 ```
-So thats options!

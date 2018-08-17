@@ -1,4 +1,5 @@
-(ns clj-arangodb.arangodb.options)
+(ns clj-arangodb.arangodb.options
+  (:require [clojure.string :as str]))
 
 (defn- class->symbol [^Class c]
   (symbol (.substring (.toString c) 6)))
