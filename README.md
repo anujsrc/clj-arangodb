@@ -70,18 +70,9 @@ Connection (database/collection) objects appear in position 1 (standard) and the
    (.insertDocument coll (adapter/serialize doc) (options/build DocumentCreateOptions options))))
 ```
 
-```clojure
-(defn get-document
-  ([^ArangoCollection coll ^Class as ^String key]
-   (.getDocument coll key as))
-  ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
-   (.getDocument coll key as (options/build DocumentReadOptions options))))
-```
+This is a consious decision as it allows both for use of the `->>` (thread last) macro and writing `partial` functions
 
-
-This is a consious decision as it allows for use of the `->>` (thread last) macro.
-
-# What is a document
+### What is a document
 
 A document is a mapping from keys to vals - by default the java driver allows the user to pass
 the following
@@ -104,7 +95,6 @@ it will be converted into a `VPackSlice` behind the scenes by `adapter/serialize
   (serialize [data] data))
 ```
 
-The `VpackSlice` Object is of interest to us as it used internally by the database. This library provides functionality for converting both to and from.
 Thus the following two calls are identical
 
 ```clojure
@@ -130,6 +120,21 @@ Or java Maps (note that the keys are strings)
      (collections/insert-document coll))
 ```
 
+## Retrieving Documents
+
+Documents can be retreived using a `database` object or a `collection` object.
+If the `database` is being used then an `id` must be provided, with a `collection` a `key` is required.
+
+```clojure
+(defn get-document
+  ([^ArangoCollection coll ^Class as ^String key]
+   (.getDocument coll key as))
+  ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
+   (.getDocument coll key as (options/build DocumentReadOptions options))))
+```
+
+The interesting thing here is that the `class` of the deserialized document must be passed.
+If `String` is passed then the resulting document will be *JSON*, `VPackSlice` returns a *VPackSlice*
 
 
 
