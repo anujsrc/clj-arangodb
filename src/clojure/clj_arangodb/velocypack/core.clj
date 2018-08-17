@@ -166,8 +166,8 @@
   Takes an optional `key-fn`.
   By default integer and float keys are converted
   all others are returned as keywords"
-  ([^VPackSlice slice] (unpack slice utils/str->key))
-  ([^VPackSlice slice key-fn]
+  ([^VPackSlice slice] (unpack utils/str->key slice))
+  ([key-fn ^VPackSlice slice]
    (case (.toString ^ValueType (.getType slice))
      "OBJECT"
      (let [len (long (.getLength slice))]

@@ -104,8 +104,34 @@ it will be converted into a `VPackSlice` behind the scenes by `adapter/serialize
   (serialize [data] data))
 ```
 
-
 The `VpackSlice` Object is of interest to us as it used internally by the database. This library provides functionality for converting both to and from.
+Thus the following two calls are identical
+
+```clojure
+(->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+     (collections/insert-document coll)
+```
+
+```clojure
+(->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+     vpack/pack
+     (collections/insert-document coll)
+```
+
+You can pass JSON encoded strings
+```clojure
+(->> "{\"name\":\"Leonhard\",\"surname\":\"Euler\",\"likes\":\"graphs\",\"age\":28}"
+     (c/insert-document coll))
+```
+Or java Maps (note that the keys are strings)
+```clojure
+(->> {"name" "Leonhard" "surname" "Euler" "likes" "graphs" "age" 28}
+     (java.util.HashMap.)
+     (collections/insert-document coll))
+```
+
+
+
 
 Most return values are `Entity` objects - for example inserting a document returns a `DocumentCreateEntity`.
 Initially I thought it was a good idea to implicity convert these objects into clojure maps - however, if you are after performance (while not much of an overhead) such an implicit conversion is undesirable.
