@@ -56,6 +56,21 @@ Now that we have a collection, lets add some *stuff*.
 
 ## Adding documents
 
+# Document positions
+
+As a rule funtions that accept documents/keys/ids take them as their last argument - this is **not** inkeeping with the underlying methods.
+Take for example
+
+```clojure
+(defn insert-document ^DocumentCreateEntity
+  ([^ArangoCollection coll ^Object doc]
+   (.insertDocument coll doc))
+  ([^ArangoCollection coll ^DocumentCreateOptions options ^Object doc]
+   (.insertDocument coll doc (options/build DocumentCreateOptions options))))
+```
+
+This is a consious decision as it allows for use of the `->>` (thread last) macro.
+
 # What is a document
 
 A document is a mapping from keys to vals - by default the java driver allows the user to pass
@@ -64,6 +79,21 @@ the following
 - `(collections/insert-document my-json-object)`
 - `(collections/insert-document my-vpack-slice-object)`
 - `(collections/insert-document my-plain-old-java-object)`
+
+The `VpackSlice` Object is of interest to us as it used internally by the database. This library provides functionality for converting both to and from.
+
+Most return values are `Entity` objects - for example inserting a document returns a `DocumentCreateEntity`.
+Initially I thought it was a good idea to implicity convert these objects into clojure maps - however, if you are after performance (while not much of an overhead) such an implicit conversion is undesirable.
+Consider for example the case when you want to call
+
+```clojure
+(->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+     vpack/pack
+     (collections/insert-document coll {:silent true})
+```
+
+The silent option means that no information will be returned - making such an implict convertsion superfluous.
+
 
 Lets assume that we have a document will use the function `collections/insert-document`
 
