@@ -93,7 +93,7 @@ the following
 By default if you pass a clojure map (strictly speaking anything that implements the `IPersistentMap` interface) - then
 it will be converted into a `VPackSlice` behind the scenes by `adapter/serialize`.
 
-```
+```clojure
 (defprotocol Serialize
   (serialize [data] "enusre that the data is in a suitable format"))
 
