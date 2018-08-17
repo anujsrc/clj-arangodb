@@ -2,8 +2,8 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/beoliver/clj-arangodb.svg)](https://clojars.org/beoliver/clj-arangodb)
 
-Arangodb is a multi-modal database.
-
+[Arangodb](https://docs.arangodb.com/devel/Drivers/Java/Reference/) is a multi-modal database.
+yo
 The maintainers of arangodb provide a java driver for communicating with an arangodb server.
 This library provides clojure developers a thin (and incomplete) wrapper of that interface.
 
@@ -30,10 +30,34 @@ If a method has arity > 1 then the arguments are placed in a vector.
 ```clojure
 (require '[clj-arangodb.arangodb.core :as arango])
 (import 'com.arangodb.Protocol)
-(def arango-db (arango/connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
+(def conn (arango/connect {:useProtocol Protocol/VST :host ["192.168.182.50" 8888]}))
 ```
 
 This approach will be explained slightly more when we look at passing options.
+
+## Creating Databases and Collections
+
+We have a connection object - it's now time to create a database.
+
+The structure of the library can roughly be separated into `core`, `databases` and `collections`
+The `core` namespace exposes functions that expect a **connection** object as their first parameter,
+The `databases` namespace exposes those that expect a **database** object and so on.
+
+Lets assume that you are testing locally and have given a user "test" access -
+we create a new database and collection (assuming that they do not exist).
+We will not bother with any options here
+
+```clojure
+(def conn (arango/connect {:user "test"}))
+(def db (arango/create-and-get-database conn "someDB"))
+(def coll (databases/create-and-get-collection db "someColl"))
+```
+Now that we have a collection, lets add some *stuff*.
+
+## Creating Databases and Collections
+
+
+The `databases` namespace contains all functions (methods) that take a database object
 
 
 ## An introduction to Options
@@ -42,8 +66,6 @@ The majority of methods allow for an optional **Options** object to be passed.
 The constructors are found under `com.arangodb.model.*` in the java driver.
 
 Options are used in a very similar way to how we created a connection.
-
-Information can be found [here](https://docs.arangodb.com/devel/Drivers/Java/Reference/)
 
 Lets assume that we want to insert a document - looking at the [documentation](https://docs.arangodb.com/devel/Drivers/Java/Reference/Collection/DocumentManipulation.html) we see that the method `insertDocument` takes an optional `DocumentCreateOptions`.
 

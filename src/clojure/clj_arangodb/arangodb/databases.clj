@@ -29,78 +29,73 @@
   [^ArangoDatabase db] (.drop db))
 
 (defn get-info ^DatabaseEntity
-  [^ArangoDatabase db] (ad/from-entity (.getInfo db)))
+  [^ArangoDatabase db]
+  (.getInfo db))
 
 (defn get-document
-  "
-   Class represents the class of the returned document.
-  `String` will return a json encoding
-  `VpackSlice` will return a arangodb velocypack slice
-  `BaseDocument` will return a java object
-  "
-  ([^ArangoDatabase db ^String id]
-   (get-document db id ad/*default-doc-class*))
-  ([^ArangoDatabase db ^String id ^Class as]
-   (ad/deserialize-doc (.getDocument db id as)))
-  ([^ArangoDatabase db ^String id ^Class as ^DocumentReadOptions options]
-   (ad/deserialize-doc (.getDocument db id as (options/build DocumentReadOptions options)))))
+  ([^ArangoDatabase db ^Class as ^String id]
+   (.getDocument db id as))
+  ([^ArangoDatabase db ^DocumentReadOptions options ^Class as ^String id]
+   (.getDocument db id as (options/build DocumentReadOptions options))))
 
 (defn ^CollectionEntity create-collection
   "create a new collection entity"
-  ([^ArangoDatabase db ^String coll-name]
-   (ad/from-entity (.createCollection db coll-name)))
-  ([^ArangoDatabase db ^String coll-name ^CollectionCreateOptions options]
-   (ad/from-entity (.createCollection db coll-name
-                                      (options/build CollectionCreateOptions options)))))
+  ([^ArangoDatabase db ^String label]
+   (.createCollection db label))
+  ([^ArangoDatabase db ^CollectionCreateOptions options ^String label]
+   (.createCollection db label (options/build CollectionCreateOptions options))))
 
 (defn collection ^ArangoCollection
-  ([^ArangoDatabase db ^String coll-name]
-   (.collection db coll-name)))
+  ([^ArangoDatabase db ^String label]
+   (.collection db label)))
 
 (def get-collection collection)
 
 (defn create-and-get-collection ^ArangoCollection
-  ([^ArangoDatabase db ^String coll-name]
-   (do (.createCollection db coll-name)
-       (.collection db coll-name)))
-  ([^ArangoDatabase db ^String coll-name ^CollectionCreateOptions options]
-   (do (.createCollection db coll-name (options/build CollectionCreateOptions options))
-       (.collection db coll-name))))
+  ([^ArangoDatabase db ^String label]
+   (do (.createCollection db label)
+       (.collection db label)))
+  ([^ArangoDatabase db ^CollectionCreateOptions options ^String label]
+   (do (.createCollection db label (options/build CollectionCreateOptions options))
+       (.collection db label))))
 
 (defn get-collections
   ;; returns a collection of CollectionEntity
   ([^ArangoDatabase db]
-   (vec (map ad/from-entity (.getCollections db))))
+   (.getCollections db))
   ([^ArangoDatabase db ^CollectionsReadOptions options]
-   (vec (map ad/from-entity
-             (.getCollections db (options/build CollectionsReadOptions options))))))
+   (.getCollections db (options/build CollectionsReadOptions options))))
 
 (defn get-collection-names
   ([^ArangoDatabase db]
-   (vec (map #(.getName ^CollectionEntity %) (.getCollections db)))))
+   (map #(.getName ^CollectionEntity %) (.getCollections db))))
 
 (defn get-graphs
   ;; returns a collection of GraphEntity
   [^ArangoDatabase db]
-  (vec (map ad/from-entity (.getGraphs db))))
+  (.getGraphs db))
 
-(defn collection-exists? [^ArangoDatabase db collection-name]
-  (some #(= collection-name (.getName ^CollectionEntity %)) (.getCollections db)))
+(defn collection-exists?
+  [^ArangoDatabase db label]
+  (some #(= label (.getName ^CollectionEntity %)) (.getCollections db)))
 
-(defn graph-exists? [^ArangoDatabase db graph-name]
-  (some #(= graph-name (.getName ^GraphEntity %)) (.getGraphs db)))
+(defn graph-exists? [^ArangoDatabase db label]
+  (some #(= label (.getName ^GraphEntity %)) (.getGraphs db)))
 
 (defn create-graph
-  "Create a new graph `graph-name`. edge-definitions must be a non empty
+  "Create a new graph `label` edge-definitions must be a non empty
   sequence of maps `{:name 'relationName' :from ['collA'...] :to [collB...]}`
   if the names in sources and targets do not exist on the database,
   then new collections will be created."
   ^GraphEntity
-  [^ArangoDatabase db ^String name edge-definitions ^GraphCreateOptions options]
-  (ad/from-entity (.createGraph db name
-                                (map #(if (map? %) (graph/edge-definition %) %)
-                                     edge-definitions)
-                                (options/build GraphCreateOptions options))))
+  [^ArangoDatabase db
+   ^GraphCreateOptions options
+   ^String label
+   ^java.util.Collection edge-definitions]
+  (.createGraph db label
+                (map #(if (map? %) (graph/edge-definition %) %)
+                     edge-definitions)
+                (options/build GraphCreateOptions options)))
 
 (defn graph ^ArangoGraph
   ([^ArangoDatabase db ^String graph-name]

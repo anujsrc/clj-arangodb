@@ -22,32 +22,34 @@
   ([] (connect {}))
   ([options] (.build ^ArangoDB$Builder (options/build ArangoDB$Builder options))))
 
-(defn shutdown [^ArangoDB conn] (.shutdown conn))
+(defn shutdown [^ArangoDB conn]
+  (.shutdown conn))
 
 (defn ^Boolean create-database
-  "returns `true` on success else `ArangoDBException`"
-  [^ArangoDB conn ^String db-name]
-  (.createDatabase conn db-name))
+  "Create a new database with name `label`.
+  Returns `true` on success else `ArangoDBException`"
+  [^ArangoDB conn ^String label]
+  (.createDatabase conn label))
 
 (defn ^ArangoDatabase db
   "Always returns a new `ArrangoDatabase` even if no such database exists
   the returned object can be used if a databse is created at a later time"
-  [^ArangoDB conn ^String db-name]
-  (.db conn db-name))
+  [^ArangoDB conn ^String label]
+  (.db conn label))
 
 (def get-database db)
 
 (defn ^Boolean create-and-get-database
-  ""
-  [^ArangoDB conn ^String db-name]
-  (do (.createDatabase conn db-name)
-      (.db conn db-name)))
+  "create a new databse with name `label` and return the `object`"
+  [^ArangoDB conn ^String label]
+  (do (.createDatabase conn label)
+      (.db conn label)))
 
 (defn get-databases
-  "returns a `vec` of strings corresponding to the names of databases"
-  [^ArangoDB conn] (vec (.getDatabases conn)))
+  "Returns a `seq` of database labels"
+  [^ArangoDB conn] (seq (.getDatabases conn)))
 
 (defn database?
-  "returns true if `db-name` is an existsing db"
-  [^ArangoDB conn ^String db-name]
-  (boolean (some #{db-name} (get-databases conn))))
+  "Returns true if `label` is an existsing db"
+  [^ArangoDB conn ^String label]
+  (boolean (some #{label} (get-databases conn))))
