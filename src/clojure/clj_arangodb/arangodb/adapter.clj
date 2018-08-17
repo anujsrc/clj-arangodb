@@ -35,6 +35,15 @@
 (defmulti serialize-doc class)
 (defmulti deserialize-doc class)
 
+(defprotocol Serialize
+  (serialize [data] "enusre that the data is in a suitable format"))
+
+(extend-protocol Serialize
+  clojure.lang.IPersistentMap
+  (serialize [data] (vpack/pack data))
+  Object
+  (serialize [data] data))
+
 (defmethod serialize-doc :default [o] (vpack/pack o))
 
 (defmethod deserialize-doc VPackSlice [o] (vpack/unpack o))

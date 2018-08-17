@@ -9,7 +9,7 @@ This library provides clojure developers a thin (and incomplete) wrapper of that
 ## Philosophy
 
 - Simple
-- Unopinionated
+- Unopinionated (But with sane defaults)
 - Idiomatic (whatever that means)
 
 ## Lets connect
@@ -65,9 +65,9 @@ Connection (database/collection) objects appear in position 1 (standard) and the
 ```clojure
 (defn insert-document ^DocumentCreateEntity
   ([^ArangoCollection coll ^Object doc]
-   (.insertDocument coll doc))
+   (.insertDocument coll (adapter/serialize doc)))
   ([^ArangoCollection coll ^DocumentCreateOptions options ^Object doc]
-   (.insertDocument coll doc (options/build DocumentCreateOptions options))))
+   (.insertDocument coll (adapter/serialize doc) (options/build DocumentCreateOptions options))))
 ```
 
 ```clojure
@@ -78,6 +78,7 @@ Connection (database/collection) objects appear in position 1 (standard) and the
    (.getDocument coll key as (options/build DocumentReadOptions options))))
 ```
 
+
 This is a consious decision as it allows for use of the `->>` (thread last) macro.
 
 # What is a document
@@ -85,9 +86,24 @@ This is a consious decision as it allows for use of the `->>` (thread last) macr
 A document is a mapping from keys to vals - by default the java driver allows the user to pass
 the following
 
-- `(collections/insert-document my-json-object)`
-- `(collections/insert-document my-vpack-slice-object)`
-- `(collections/insert-document my-plain-old-java-object)`
+- JSON
+- VPackSlice
+- POJO (plain old Java object)
+
+By default if you pass a clojure map (strictly speaking anything that implements the `IPersistentMap` interface) - then
+it will be converted into a `VPackSlice` behind the scenes by `adapter/serialize`.
+
+```
+(defprotocol Serialize
+  (serialize [data] "enusre that the data is in a suitable format"))
+
+(extend-protocol Serialize
+  clojure.lang.IPersistentMap
+  (serialize [data] (vpack/pack data))
+  Object
+  (serialize [data] data))
+```
+
 
 The `VpackSlice` Object is of interest to us as it used internally by the database. This library provides functionality for converting both to and from.
 
