@@ -182,7 +182,7 @@ If the `database` is being used then an `id` must be provided, with a `collectio
 The interesting thing here is that the `class` of the deserialized document must be passed.
 If `String` is passed then the resulting document will be *JSON*, `VPackSlice` returns a *VPackSlice*
 
-Again if no class is passed then it defaults to serialization/deserialization using Velocypack
+Again if no class is passed then it defaults to deserialization using the `unpack` function in `clj-arangodb.velocypack.core`
 
 Lets assume that we have a `res` document from using the function `collections/insert-document`
 
