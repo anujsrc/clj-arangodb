@@ -132,7 +132,46 @@ Or java Maps (note that the keys are strings)
      (collections/insert-document coll))
 ```
 
-## Retrieving Documents
+## Results
+
+When we inserted our document the java driver returned an `DocumentCreateEntity` object.
+Until recently this library had chosen to **implicitly** convert these objects into clojure maps.
+While in many cases this was desirable - it is not always the case.
+For example consider the call
+
+```clojure
+(->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+     vpack/pack
+     (collections/insert-document coll {:silent true})
+```
+In which the resulting `DocumentCreateEntity` will not have any values (`silent` option). Converting this into a clojure map is just a waste of time.
+
+Another example is when you simply want to keep the returned `key` or `id` for later processing.
+
+This is where the `entity` namespace comes in. It provides a nummber of protocols (to avoid reflection warnings) that can be extended.
+
+``` clojure
+user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+           (c/insert-document coll)
+           entity/get-key)
+"2859436"
+```
+
+``` clojure
+user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+           (c/insert-document coll)
+           entity/from-entity)
+"2859436"
+```
+
+```clojure
+user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
+           (c/insert-document coll)
+           entity/from-entity)
+{:class com.arangodb.entity.DocumentCreateEntity, :id "someColl/2860840", :key "2860840", :new nil, :old nil, :rev "_XR8bHYK--_"}
+```
+
+## Retreiving Documents
 
 Documents can be retreived using a `database` object or a `collection` object.
 If the `database` is being used then an `id` must be provided, with a `collection` a `key` is required.
