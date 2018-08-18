@@ -322,8 +322,6 @@ user> (reduce (fn [acc x] (conj acc x)) [] (vpack/slice-get-in xs [:nested :like
 [#object[com.arangodb.velocypack.VPackSlice 0x224346b2 "\"graphs\""] #object[com.arangodb.velocypack.VPackSlice 0x72e852c9 "\"bridges\""]]
 ```
 
-```
-
 ## An introduction to Options
 
 The majority of methods allow for an optional **Options** object to be passed.
