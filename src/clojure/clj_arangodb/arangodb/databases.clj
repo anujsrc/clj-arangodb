@@ -10,6 +10,8 @@
             ArangoDatabase
             ArangoGraph
             ArangoCollection]
+           [com.arangodb.velocypack
+            VPackSlice]
            [com.arangodb.entity
             GraphEntity
             CollectionEntity
@@ -33,6 +35,8 @@
   (.getInfo db))
 
 (defn get-document
+  ([^ArangoDatabase db ^String id]
+   (vpack/unpack (.getDocument db id VPackSlice)))
   ([^ArangoDatabase db ^Class as ^String id]
    (.getDocument db id as))
   ([^ArangoDatabase db ^DocumentReadOptions options ^Class as ^String id]
@@ -106,10 +110,10 @@
 (defn query ^ArangoCursor
   ;; can pass java.util.Map / java.util.List as well
   ([^ArangoDatabase db aql-query]
-   (query db aql-query nil nil ad/*default-doc-class*))
-  ([^ArangoDatabase db aql-query ^Class as]
+   (query db aql-query nil nil VPackSlice))
+  ([^ArangoDatabase db ^Class as aql-query]
    (query db aql-query nil nil as))
-  ([^ArangoDatabase db aql-query ^AqlQueryOptions options ^Class as]
+  ([^ArangoDatabase db ^AqlQueryOptions options ^Class as aql-query]
    (query db aql-query nil options as))
-  ([^ArangoDatabase db aql-query bindvars ^AqlQueryOptions options ^Class as]
+  ([^ArangoDatabase db bindvars ^AqlQueryOptions options ^Class as aql-query]
    (.query db ^String (aql/serialize aql-query) bindvars (options/build AqlQueryOptions options) as)))

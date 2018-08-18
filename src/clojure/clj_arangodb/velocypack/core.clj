@@ -5,7 +5,71 @@
             ArrayIterator
             VPackSlice
             ValueType
-            VPackBuilder]))
+            VPackBuilder]
+           [com.arangodb.velocypack.exception
+            VPackValueTypeException]))
+
+(defn- slice-array-reduce
+  ([^VPackSlice slice f]
+   (let [iter (.arrayIterator slice)]
+     (if (.hasNext iter)
+       (loop [ret (.next iter)]
+         (if (.hasNext iter)
+           (let [ret (f ret ^VPackSlice (.next iter))]
+             (if (reduced? ret)
+               @ret
+               (recur ret)))
+           ret))
+       (f))))
+  ([^VPackSlice slice f val]
+   (let [iter (.arrayIterator slice)]
+     (loop [ret val]
+       (if (.hasNext iter)
+         (let [ret (f ret ^VPackSlice (.next iter))]
+           (if (reduced? ret)
+             @ret
+             (recur ret)))
+         ret)))))
+
+(extend-protocol clojure.core.protocols/IKVReduce
+  VPackSlice
+  (kv-reduce [slice f init]
+    (reduce (fn [ret [^String k ^VPackSlice v]]
+              (f ret k v)) init (iterator-seq (.objectIterator slice)))))
+
+(extend-protocol clojure.core.protocols/CollReduce
+  VPackSlice
+  (coll-reduce
+    ([coll f] (slice-array-reduce coll f))
+    ([coll f val] (slice-array-reduce coll f val))))
+
+(defn slice-get
+  ([slice key] (slice-get slice key nil))
+  ([^VPackSlice slice key not-found]
+   (if-not (.isObject slice)
+     not-found
+     (let [elem (.get slice ^String (name key))]
+       (if (.isNone elem)
+         not-found
+         elem)))))
+
+(defn slice-get-in
+  ([slice keys] (slice-get-in slice keys nil))
+  ([^VPackSlice slice keys not-found]
+   (reduce (fn [^VPackSlice slice key]
+             (if-not (.isObject slice)
+               not-found
+               (let [elem (.get slice ^String (name key))]
+                 (if (.isNone elem)
+                   not-found
+                   elem)))) slice keys)))
+
+(defn slice-nth
+  [^VPackSlice slice ^Integer nth]
+  (.get slice nth))
+
+(defn slice-type [^VPackSlice slice]
+  (.getType slice))
 
 (defprotocol VPackable
   (pack [this])
@@ -140,24 +204,27 @@
   (pack [this] ^VPackSlice
     (.slice (.close ^VPackBuilder
                     (reduce (fn [^VPackBuilder b [k v]]
-                              (add-entry v (if (instance? clojure.lang.Keyword k) (. ^clojure.lang.Named k (getName))
-                                               (. k (toString))) b))
+                              (add-entry v (if (instance? clojure.lang.Keyword k)
+                                             (. ^clojure.lang.Named k (getName))
+                                             (. k (toString))) b))
                             (.add (VPackBuilder.) ^ValueType ValueType/OBJECT)
                             this))))
 
   (add-item [this ^VPackBuilder builder]
     (.close ^VPackBuilder
             (reduce (fn [^VPackBuilder b [k v]]
-                      (add-entry v (if (instance? clojure.lang.Keyword k) (. ^clojure.lang.Named k (getName))
-                                       (. k (toString))) b))
+                      (add-entry v (if (instance? clojure.lang.Keyword k)
+                                     (. ^clojure.lang.Named k (getName))
+                                     (. k (toString))) b))
                     (.add builder ^ValueType ValueType/OBJECT)
                     this)))
 
   (add-entry [this ^String k ^VPackBuilder builder]
     (.close ^VPackBuilder
             (reduce (fn [^VPackBuilder b [k v]]
-                      (add-entry v (if (instance? clojure.lang.Keyword k) (. ^clojure.lang.Named k (getName))
-                                       (. k (toString))) b))
+                      (add-entry v (if (instance? clojure.lang.Keyword k)
+                                     (. ^clojure.lang.Named k (getName))
+                                     (. k (toString))) b))
                     (.add builder ^String k ^ValueType ValueType/OBJECT)
                     this))))
 
@@ -198,3 +265,20 @@
      "NONE" nil
      "ILLEGAL" nil
      slice)))
+
+(defn unpack-get
+  "Returns the value in a nested VPackSlice,
+  Returns nil if the key is not present"
+  [^VPackSlice slice key]
+  (some-> slice
+          (slice-get key nil)
+          unpack))
+
+(defn unpack-get-in
+  "Returns the value in a nested VPackSlice,
+  where ks is a sequence of keys. Returns nil if the key
+  is not present"
+  [^VPackSlice slice ks]
+  (some-> slice
+          (slice-get-in ks nil)
+          unpack))

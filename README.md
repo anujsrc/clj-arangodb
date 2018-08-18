@@ -231,7 +231,7 @@ passing the `Object` class returns a `java.util.HashMap`
 user> (->> res
            entity/get-key
            (c/get-document coll Object))
-{"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "swag/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
+{"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "someColl/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
 ```
 
 ### com.arangodb.entity.BaseDocument
@@ -275,6 +275,53 @@ user> (-> (->Person "a" "b" 23)
           vpack/unpack
           map->Person)
 #user.Person{:name "a", :surname "b", :age 23}
+```
+
+The namespace `clj-arangodb.velocypack.core` provides you with a host of utility functions for working with VPackSlice objects.
+
+```clojure
+user> (def xs (vpack/pack {:name "Leonhard" :nested {:likes ["graphs" "bridges"] :dislikes []}}))
+#'user/xs
+```
+
+```clojure
+user> xs
+#object[com.arangodb.velocypack.VPackSlice 0x7f59241e "{\"name\":\"Leonhard\",\"nested\":{\"likes\":[\"graphs\",\"bridges\"],\"dislikes\":[]}}"]
+```
+
+```clojure
+user> (vpack/unpack xs)
+{:name "Leonhard", :nested {:dislikes [], :likes ["graphs" "bridges"]}}
+user> (vpack/unpack identity xs)
+{"name" "Leonhard", "nested" {"dislikes" [], "likes" ["graphs" "bridges"]}}
+```
+
+It is possible to get from a VPackSlice - this takes an optional `not-found`
+```clojure
+user> (vpack/slice-get xs :name)
+#object[com.arangodb.velocypack.VPackSlice 0x45f670d3 "\"Leonhard\""]
+```
+
+`unpack-get` will unpack only under the key provided - returns `nil` if key not found.
+```clojure
+user> (vpack/unpack-get xs :name)
+"Leonhard"
+```
+`unpack-get-in` allows for unpacking nested structures
+`unpack-get` will unpack only under the key provided - returns `nil` if key not found.
+```clojure
+user> (vpack/unpack-get-in xs [:nested :likes])
+["graphs" "bridges"]
+```
+
+VPackSlice has been extended to support both reduce and kv-reduce
+```clojure
+user> (vpack/slice-get-in xs [:nested :likes])
+#object[com.arangodb.velocypack.VPackSlice 0x1e6b854b "[\"graphs\",\"bridges\"]"]
+user> (reduce (fn [acc x] (conj acc x)) [] (vpack/slice-get-in xs [:nested :likes]))
+[#object[com.arangodb.velocypack.VPackSlice 0x224346b2 "\"graphs\""] #object[com.arangodb.velocypack.VPackSlice 0x72e852c9 "\"bridges\""]]
+```
+
 ```
 
 ## An introduction to Options

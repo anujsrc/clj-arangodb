@@ -53,8 +53,8 @@
   (.exists coll))
 
 (defn rename ^CollectionEntity
-  [^ArangoCollection coll ^String new-name]
-  (.rename coll new-name))
+  [^ArangoCollection coll ^String label]
+  (.rename coll label))
 
 (defn load ^CollectionEntity
   [^ArangoCollection coll]
@@ -108,7 +108,7 @@
 
 (defn get-document
   ([^ArangoCollection coll ^String key]
-   (vpack/unpack (.getDocument coll key VPackSlice)))
+   (adapter/deserialize-doc (.getDocument coll key adapter/*default-doc-class*)))
   ([^ArangoCollection coll ^Class as ^String key]
    (.getDocument coll key as))
   ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
@@ -116,45 +116,57 @@
 
 (defn get-documents ^MultiDocumentEntity
   ([^ArangoCollection coll ^Collection keys]
-   (map vpack/unpack (.getDocuments coll keys VPackSlice)))
+   (.getDocuments coll keys adapter/*default-doc-class*))
   ([^ArangoCollection coll ^Class as ^Collection keys]
    (.getDocuments coll keys as)))
 
-(defn insert-document ^DocumentCreateEntity
+(defn insert-document
+  "insert a single document into the collection.
+  Ensures that `doc` is converted into a format suitable for the `java-driver`"
+  ^DocumentCreateEntity
   ([^ArangoCollection coll ^Object doc]
-   (.insertDocument coll (adapter/serialize doc)))
+   (.insertDocument coll (adapter/serialize-doc doc)))
   ([^ArangoCollection coll ^DocumentCreateOptions options ^Object doc]
-   (.insertDocument coll (adapter/serialize doc) (options/build DocumentCreateOptions options))))
+   (.insertDocument coll (adapter/serialize-doc doc)
+                    (options/build DocumentCreateOptions options))))
 
-(defn insert-documents ^MultiDocumentEntity
+(defn insert-documents
+  "insert multiple documents into the collection.
+  Ensures that each `doc` is converted into a format suitable for the `java-driver`"
+  ^MultiDocumentEntity
   ([^ArangoCollection coll docs]
-   (.insertDocuments coll ^Collection (map adapter/serialize docs)))
+   (.insertDocuments coll ^Collection (map adapter/serialize-doc docs)))
   ([^ArangoCollection coll ^DocumentCreateOptions options ^Collection docs]
-   (.insertDocuments coll (map adapter/serialize docs) (options/build DocumentCreateOptions options))))
+   (.insertDocuments coll (map adapter/serialize-doc docs)
+                     (options/build DocumentCreateOptions options))))
 
 (defn update-document ^DocumentUpdateEntity
   ([^ArangoCollection coll ^String key ^Object doc]
-   (.updateDocument coll key (adapter/serialize doc)))
+   (.updateDocument coll key (adapter/serialize-doc doc)))
   ([^ArangoCollection coll ^DocumentUpdateOptions options ^String key ^Object doc]
-   (.updateDocument coll key (adapter/serialize doc) (options/build DocumentUpdateOptions options))))
+   (.updateDocument coll key (adapter/serialize-doc doc)
+                    (options/build DocumentUpdateOptions options))))
 
 (defn update-documents ^MultiDocumentEntity
   ([^ArangoCollection coll ^Collection docs]
-   (.updateDocuments coll (map adapter/serialize docs)))
+   (.updateDocuments coll (map adapter/serialize-doc docs)))
   ([^ArangoCollection coll ^DocumentUpdateOptions options ^Collection docs]
-   (.updateDocuments coll (map adapter/serialize docs) (options/build DocumentUpdateOptions options))))
+   (.updateDocuments coll (map adapter/serialize-doc docs)
+                     (options/build DocumentUpdateOptions options))))
 
 (defn replace-document ^DocumentUpdateEntity
   ([^ArangoCollection coll ^String key ^Object doc]
-   (.replaceDocument coll key (adapter/serialize doc)))
+   (.replaceDocument coll key (adapter/serialize-doc doc)))
   ([^ArangoCollection coll ^DocumentReplaceOptions options ^String key ^Object doc]
-   (.replaceDocument coll key (adapter/serialize doc) (options/build DocumentReplaceOptions options))))
+   (.replaceDocument coll key (adapter/serialize-doc doc)
+                     (options/build DocumentReplaceOptions options))))
 
 (defn replace-documents ^MultiDocumentEntity
   ([^ArangoCollection coll docs]
-   (.replaceDocuments coll ^Collection (map adapter/serialize docs)))
+   (.replaceDocuments coll ^Collection (map adapter/serialize-doc docs)))
   ([^ArangoCollection coll ^DocumentReplaceOptions options ^Collection docs]
-   (.replaceDocuments coll (map adapter/serialize docs) (options/build DocumentReplaceOptions options))))
+   (.replaceDocuments coll (map adapter/serialize-doc docs)
+                      (options/build DocumentReplaceOptions options))))
 
 (defn delete-document ^DocumentDeleteEntity
   ([^ArangoCollection coll ^String key]
