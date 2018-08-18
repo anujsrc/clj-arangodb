@@ -180,23 +180,33 @@ If the `database` is being used then an `id` must be provided, with a `collectio
 The interesting thing here is that the `class` of the deserialized document must be passed.
 If `String` is passed then the resulting document will be *JSON*, `VPackSlice` returns a *VPackSlice*
 
-
-
-Most return values are `Entity` objects - for example inserting a document returns a `DocumentCreateEntity`.
-Initially I thought it was a good idea to implicity convert these objects into clojure maps - however, if you are after performance (while not much of an overhead) such an implicit conversion is undesirable.
-Consider for example the case when you want to call
+Lets assume that we have a document will use the function `collections/insert-document`
 
 ```clojure
-(->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
-     vpack/pack
-     (collections/insert-document coll {:silent true})
+user> (c/get-document coll VPackSlice (entity/get-key res))
+#object[com.arangodb.velocypack.VPackSlice 0x3f287f55 "{\"_id\":\"someColl\\/2859734\",\"_key\":\"2859734\",\"_rev\":\"_XR8Os5e--_\",\"age\":28,\"likes\":\"graphs\",\"name\":\"Leonhard\",\"surname\":\"Euler\"}"]
 ```
 
-The silent option means that no information will be returned - making such an implict convertsion superfluous.
-
-
-
-Lets assume that we have a document will use the function `collections/insert-document`
+```clojure
+user> (c/get-document coll String (entity/get-key res))
+"{\"_id\":\"someColl\\/2859734\",\"_key\":\"2859734\",\"_rev\":\"_XR8Os5e--_\",\"age\":28,\"likes\":\"graphs\",\"name\":\"Leonhard\",\"surname\":\"Euler\"}"
+```
+```clojure
+user> (c/get-document coll java.util.Map (entity/get-key res))
+{"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "someColl/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
+```
+```clojure
+user> (c/get-document coll com.arangodb.entity.BaseDocument (entity/get-key res))
+#object[com.arangodb.entity.BaseDocument 0xa5124bc "BaseDocument [documentRevision=_XR8Os5e--_, documentHandle=someColl/2859734, documentKey=2859734, properties={surname=Euler, name=Leonhard, age=28, likes=graphs}]"]
+```
+```clojure
+user> (-> (c/get-document coll com.arangodb.entity.BaseDocument (entity/get-key res)) entity/from-entity)
+{:class com.arangodb.entity.BaseDocument, :id "someColl/2859734", :key "2859734", :properties {"surname" "Euler", "name" "Leonhard", "age" 28, "likes" "graphs"}, :revision "_XR8Os5e--_"}
+```
+```clojure
+user> (c/get-document coll clojure.lang.PersistentArrayMap (entity/get-key res))
+IllegalAccessException Class com.arangodb.velocypack.VPack can not access a member of class clojure.lang.PersistentArrayMap with modifiers "protected"  sun.reflect.Reflection.ensureMemberAccess (Reflection.java:102)
+```
 
 ## Vpack
 
