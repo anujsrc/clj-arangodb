@@ -182,19 +182,47 @@ If `String` is passed then the resulting document will be *JSON*, `VPackSlice` r
 
 Lets assume that we have a document will use the function `collections/insert-document`
 
+### VPack
+
 ```clojure
-user> (c/get-document coll VPackSlice (entity/get-key res))
+user> (->> res
+           entity/get-key
+           (c/get-document coll VPackSlice))
 #object[com.arangodb.velocypack.VPackSlice 0x3f287f55 "{\"_id\":\"someColl\\/2859734\",\"_key\":\"2859734\",\"_rev\":\"_XR8Os5e--_\",\"age\":28,\"likes\":\"graphs\",\"name\":\"Leonhard\",\"surname\":\"Euler\"}"]
 ```
+By default the `unpack` function will keywordize the keys
+```clojure
+user> (->> res
+           entity/get-key
+           (c/get-document coll VPackSlice)
+           vpack/unpack)
+{:_id "someColl/2859734", :_key "2859734", :_rev "_XR8Os5e--_", :age 28, :likes "graphs", :name "Leonhard", :surname "Euler"}
+```
+You can pass any function that you want in this example we use `identity` so that the keys are keps as strings
+```clojure
+user> (->> res
+           entity/get-key
+           (c/get-document coll VPackSlice)
+           (vpack/unpack identity))
+{"_id" "someColl/2859734", "_key" "2859734", "_rev" "_XR8Os5e--_", "age" 28, "likes" "graphs", "name" "Leonhard", "surname" "Euler"}
+```
+
+### JSON (String)
 
 ```clojure
 user> (c/get-document coll String (entity/get-key res))
 "{\"_id\":\"someColl\\/2859734\",\"_key\":\"2859734\",\"_rev\":\"_XR8Os5e--_\",\"age\":28,\"likes\":\"graphs\",\"name\":\"Leonhard\",\"surname\":\"Euler\"}"
 ```
+
+### java.util.Map
+
 ```clojure
 user> (c/get-document coll java.util.Map (entity/get-key res))
 {"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "someColl/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
 ```
+
+### com.arangodb.entity.BaseDocument
+
 ```clojure
 user> (c/get-document coll com.arangodb.entity.BaseDocument (entity/get-key res))
 #object[com.arangodb.entity.BaseDocument 0xa5124bc "BaseDocument [documentRevision=_XR8Os5e--_, documentHandle=someColl/2859734, documentKey=2859734, properties={surname=Euler, name=Leonhard, age=28, likes=graphs}]"]

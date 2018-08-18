@@ -178,13 +178,13 @@
            (recur
             (assoc! acc
                     (key-fn (.getAsString (.keyAt slice i)))
-                    (unpack (.valueAt slice i) key-fn))
+                    (unpack key-fn (.valueAt slice i)))
             (inc i)))))
      "ARRAY"
      (loop [^ArrayIterator iter (.arrayIterator slice)
             xs (transient [])]
        (if (.hasNext iter)
-         (recur iter (conj! xs (unpack (.next iter) key-fn)))
+         (recur iter (conj! xs (unpack key-fn (.next iter))))
          (persistent! xs)))
      "NULL" nil
      "STRING" (.getAsString slice)
