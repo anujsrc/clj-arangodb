@@ -250,9 +250,10 @@ user> (->> (entity/get-key res)
 	   entity/from-entity)
 {:class com.arangodb.entity.BaseDocument, :id "someColl/2859734", :key "2859734", :properties {"surname" "Euler", "name" "Leonhard", "age" 28, "likes" "graphs"}, :revision "_XR8Os5e--_"}
 ```
-Unfortunately if you try to pass a clojure Class then you get a nasty exception.
 
-### Clojure Class
+### Clojure Class (clojure.lang.PersistentArrayMap etc)
+
+Unfortunately if you try to pass a clojure Class then you get a nasty exception.
 
 ```clojure
 user> (->> (entity/get-key res)
