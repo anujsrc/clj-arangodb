@@ -157,13 +157,6 @@ user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
 "2859436"
 ```
 
-``` clojure
-user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
-           (c/insert-document coll)
-           entity/from-entity)
-"2859436"
-```
-
 ```clojure
 user> (->> {:name "Leonhard" :surname "Euler" :likes "graphs" :age 28}
            (c/insert-document coll)
