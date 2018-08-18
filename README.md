@@ -53,10 +53,11 @@ we can create a new database and collection (assuming that they do not exist) us
 If we only wanted the collection then we could use the following
 
 ```clojure
-(def coll (-> {:user "test"}
-          arrango/connect
-	  (arango/create-and-get-database "someDB")
-    	  (databases/create-and-get-collection "someColl"))
+(def coll
+  (-> {:user "test"}
+      arrango/connect
+      (arango/create-and-get-database "someDB")
+      (databases/create-and-get-collection "someColl"))
 ```
 However as these are statefull java objects it makes sense to keep them around for re-use
 
