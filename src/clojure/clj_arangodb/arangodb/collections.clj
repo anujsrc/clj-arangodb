@@ -1,6 +1,7 @@
 (ns clj-arangodb.arangodb.collections
   (:require
    [clj-arangodb.arangodb.options :as options]
+   [clj-arangodb.velocypack.core  :as vpack]
    [clj-arangodb.arangodb.adapter :as adapter])
   (:import
    [java.util
@@ -106,14 +107,18 @@
   (.deleteIndex coll index))
 
 (defn get-document
+  ([^ArangoCollection coll ^String key]
+   (vpack/unpack (.getDocument coll key VPackSlice)))
   ([^ArangoCollection coll ^Class as ^String key]
    (.getDocument coll key as))
   ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
    (.getDocument coll key as (options/build DocumentReadOptions options))))
 
 (defn get-documents ^MultiDocumentEntity
-  [^ArangoCollection coll ^Class as ^Collection keys]
-  (.getDocuments coll keys as))
+  ([^ArangoCollection coll ^Collection keys]
+   (map vpack/unpack (.getDocuments coll keys VPackSlice)))
+  ([^ArangoCollection coll ^Class as ^Collection keys]
+   (.getDocuments coll keys as)))
 
 (defn insert-document ^DocumentCreateEntity
   ([^ArangoCollection coll ^Object doc]
