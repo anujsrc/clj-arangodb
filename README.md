@@ -38,21 +38,29 @@ This approach will be explained slightly more when we look at passing options.
 
 ## Creating Databases and Collections
 
-We have a connection object - it's now time to create a database.
-
 The structure of the library can roughly be separated into `core`, `databases` and `collections`
 The `core` namespace exposes functions that expect a **connection** object as their first parameter,
 The `databases` namespace exposes those that expect a **database** object and so on.
 
-Lets assume that you are testing locally and have given a user "test" access -
-we create a new database and collection (assuming that they do not exist).
-We will not bother with any options here
+Lets assume that you are testing locally and have created a "test" user -
+we can create a new database and collection (assuming that they do not exist) using the following commands
 
 ```clojure
 (def conn (arango/connect {:user "test"}))
 (def db (arango/create-and-get-database conn "someDB"))
 (def coll (databases/create-and-get-collection db "someColl"))
 ```
+If we only wanted the collection then we could use the following
+
+```clojure
+(def coll (-> {:user "test"}
+          arrango/connect
+	  (arango/create-and-get-database "someDB")
+    	  (databases/create-and-get-collection "someColl"))
+```
+However as these are statefull java objects it makes sense to keep them around for re-use
+
+
 Now that we have a collection, lets add some *stuff*.
 
 ## Adding documents

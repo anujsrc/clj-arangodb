@@ -32,23 +32,31 @@
 ;; the class of the objects that we want RETURNED
 (def ^:dynamic *default-doc-class* VPackSlice)
 
-(defmulti serialize-doc class)
-(defmulti deserialize-doc class)
+(defprotocol SerializeDoc
+  (serialize-doc [data] "enusre that the data is in a suitable format"))
 
-(defprotocol Serialize
-  (serialize [data] "enusre that the data is in a suitable format"))
-
-(extend-protocol Serialize
+(extend-protocol SerializeDoc
   clojure.lang.IPersistentMap
-  (serialize [data] (vpack/pack data))
+  (serialize-doc [data] (vpack/pack data))
   Object
-  (serialize [data] data))
+  (serialize-doc [data] data)
+  nil
+  (serialize-doc [_] nil))
 
-(defmethod serialize-doc :default [o] (vpack/pack o))
+(defprotocol DeserializeDoc
+  (deserialize-doc [data] ""))
 
-(defmethod deserialize-doc VPackSlice [o] (vpack/unpack o))
-(defmethod deserialize-doc BaseDocument [o] (bean o))
-(defmethod deserialize-doc :default [o] o)
+(extend-protocol DeserializeDoc
+  VPackSlice
+  (deserialize-doc [data] (vpack/unpack data))
+  BaseDocument
+  (deserialize-doc [data] (dissoc (bean data) :class))
+  Object
+  (deserialize-doc [data] data)
+  nil
+  (deserialize-doc [_] nil))
+
+
 
 (defmulti from-entity class)
 
