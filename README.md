@@ -216,7 +216,7 @@ user> (->> (entity/get-key res)
 "{\"_id\":\"someColl\\/2859734\",\"_key\":\"2859734\",\"_rev\":\"_XR8Os5e--_\",\"age\":28,\"likes\":\"graphs\",\"name\":\"Leonhard\",\"surname\":\"Euler\"}"
 ```
 
-### java.util.Map
+### java.util.Map and Object
 
 Note that the returned object is mutable!
 
@@ -224,6 +224,14 @@ Note that the returned object is mutable!
 user> (->> (entity/get-key res)
       	   (c/get-document coll java.util.Map))
 {"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "someColl/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
+```
+passing the `Object` class returns a `java.util.HashMap`
+
+```clojure
+user> (->> res
+           entity/get-key
+           (c/get-document coll Object))
+{"surname" "Euler", "_rev" "_XR8Os5e--_", "name" "Leonhard", "_id" "swag/2859734", "_key" "2859734", "age" 28, "likes" "graphs"}
 ```
 
 ### com.arangodb.entity.BaseDocument
@@ -243,6 +251,8 @@ user> (->> (entity/get-key res)
 {:class com.arangodb.entity.BaseDocument, :id "someColl/2859734", :key "2859734", :properties {"surname" "Euler", "name" "Leonhard", "age" 28, "likes" "graphs"}, :revision "_XR8Os5e--_"}
 ```
 Unfortunately if you try to pass a clojure Class then you get a nasty exception.
+
+### Clojure Class
 
 ```clojure
 user> (->> (entity/get-key res)
