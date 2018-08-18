@@ -92,6 +92,9 @@ the following
 
 By default if you pass a clojure map (strictly speaking anything that implements the `IPersistentMap` interface) - then
 it will be converted into a `VPackSlice` behind the scenes by `adapter/serialize`.
+The java driver allows for serialization/deserialization *modules* to be attached when creating a connection.
+Currently there is not one for Clojure datatypes. If/when such a module is written (so far my attempts have failed) then
+the `Serialize` protocol will be removed as it will be handled internally by the driver.
 
 ```clojure
 (defprotocol Serialize
