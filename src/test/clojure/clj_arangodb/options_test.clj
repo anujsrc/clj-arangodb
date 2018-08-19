@@ -1,4 +1,4 @@
-(ns options-test
+(ns clj-arangodb.options-test
   (:require [clojure.test :refer :all]
             [clj-arangodb.options :as options])
   (:import [com.arangodb.model

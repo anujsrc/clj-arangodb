@@ -15,7 +15,7 @@
   ;; Arguments single multiple arguments should be in a seq
   [class-symbol [method-key args]]
   (let [method-name (symbol (name method-key))
-        args (list args)
+        args (flatten (list args))
         params (vec (repeatedly (inc (count args)) #(gensym)))
         ;; add meta to the object so that we dont get reflection warnings!
         obj-param (with-meta (peek params) {:tag class-symbol})
