@@ -18,3 +18,25 @@
      ~@body
      (databases/drop ~db)
      (arangodb/shutdown conn#)))
+
+(defmacro with-test-db-and-coll
+  [[db coll] & body]
+  `(let [db-label# (str (gensym))
+         coll-label# (str (gensym))
+         conn# (arangodb/connect *connection-spec*)
+         ~db (arangodb/ensure-and-get-database conn# db-label#)
+         ~coll (databases/ensure-and-get-collection ~db coll-label#)]
+     ~@body
+     (databases/drop ~db)
+     (arangodb/shutdown conn#)))
+
+(defmacro with-test-coll
+  [[coll] & body]
+  `(let [db-label# (str (gensym))
+         coll-label# (str (gensym))
+         conn# (arangodb/connect *connection-spec*)
+         db# (arangodb/ensure-and-get-database conn# db-label#)
+         ~coll (databases/ensure-and-get-collection db# coll-label#)]
+     ~@body
+     (databases/drop db#)
+     (arangodb/shutdown conn#)))
