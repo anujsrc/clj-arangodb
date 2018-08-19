@@ -11,9 +11,9 @@
   (h/with-temp-db [db "testDB"]
     (let [res (d/query db [:RETURN true])
           stats (cursor/get-stats res)]
-      (is (= (:class stats)
+      (is (= (class stats)
              com.arangodb.entity.CursorEntity$Stats))
-      (is (= (set (keys stats))
+      (is (= (set (keys (adapter/from-entity stats)))
              #{:class :executionTime :filtered :fullCount
                :scannedFull :scannedIndex :writesExecuted
                :writesIgnored})))))
