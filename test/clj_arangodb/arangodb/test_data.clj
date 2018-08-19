@@ -115,7 +115,7 @@
     [db game-of-thrones-db-label]
     (d/create-collection db "Characters")
     (d/create-collection db "Traits")
-    (d/create-collection db "ChildOf" {:type com.arangodb.entity.CollectionType/EDGES})
+    (d/create-collection db {:type com.arangodb.entity.CollectionType/EDGES} "ChildOf")
     (->> [:LET ["data" characters]
           [:FOR ["c" "data"]
            [:INSERT "c" "Characters"]]]

@@ -6,11 +6,47 @@ Arangodb is a multi-modal database.
 The maintainers of arangodb provide a [java driver](https://docs.arangodb.com/devel/Drivers/Java/Reference/) for communicating with an arangodb server.
 This library provides clojure developers a thin (and incomplete) wrapper of that interface.
 
-## Philosophy
+## What is it?
 
-- Simple
-- Unopinionated (But with sane defaults)
-- Idiomatic (whatever that means)
+**clj-arangodb** provides an interface for working with the [arangodb-java-driver](https://github.com/arangodb/arangodb-java-driver). It's aim is to make life a little bit easier for clojure developers who want to integerate a graph database into their projects.
+
+## Does it do anything special?
+
+- Arguments to functions have been ordered to emphasis use of the `->>` (thread last) macro and writing partial functions.
+
+- Allows the representation of AQL queries using clojure datastructures
+
+- Provides a namespace `clj-arangodb.velocypack.core` for working with `VPackSlice` objects.
+These are the serialization format that the database uses internally and the default encoding for sending over the wire.
+
+- Provides a namespace `clj-arangodb.entity` for working with the **result** objects of the java driver.
+
+### An example
+
+```clojure
+(defn example []
+  (let [got-db (-> (arango/connect {:user "test"})
+                   (arango/get-database "gameOfThronesDB"))]
+    (->> [:FOR ["c" "Characters"]
+          [:FILTER [:EQ "c.name" "\"Ned\""]]
+          [:FOR ["v" {:start "c"
+                      :type :inbound
+                      :depth [1 1]
+                      :collections ["ChildOf"]}]
+           [:RETURN "v.name"]]]
+         (databases/query got-db)
+         (cursor/foreach #(printf "%s is a child of Ned\n" %)))))
+```
+And executing it
+```clojure
+user> (example)
+Robb is a child of Ned
+Jon is a child of Ned
+Bran is a child of Ned
+Arya is a child of Ned
+Sansa is a child of Ned
+nil
+```
 
 ## Lets connect
 

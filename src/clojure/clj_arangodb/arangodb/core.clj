@@ -39,11 +39,19 @@
 
 (def get-database db)
 
-(defn ^Boolean create-and-get-database
+(defn create-and-get-database
   "create a new databse with name `label` and return the `object`"
+  ^Boolean
   [^ArangoDB conn ^String label]
   (do (.createDatabase conn label)
       (.db conn label)))
+
+(defn ensure-and-get-database ^ArangoDatabase
+  [^ArangoDB conn ^String label]
+  (let [db (.db conn label)]
+    (when-not (.exists db)
+      (.createDatabase conn label))
+    db))
 
 (defn get-databases
   "Returns a `seq` of database labels"

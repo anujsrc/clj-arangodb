@@ -2,7 +2,7 @@
   (:require [clj-arangodb.velocypack.core :as vpack]
             [clj-arangodb.arangodb.graph :as graph]
             [clj-arangodb.arangodb.aql :as aql]
-            [clj-arangodb.arangodb.adapter :as ad]
+            [clj-arangodb.arangodb.adapter :as adapter]
             [clj-arangodb.arangodb.options :as options])
   (:import [com.arangodb
             ArangoDB
@@ -34,9 +34,13 @@
   [^ArangoDatabase db]
   (.getInfo db))
 
+(defn collection-exists?
+  [^ArangoDatabase db label]
+  (some #(= label (.getName ^CollectionEntity %)) (.getCollections db)))
+
 (defn get-document
   ([^ArangoDatabase db ^String id]
-   (vpack/unpack (.getDocument db id VPackSlice)))
+   (adapter/deserialize-doc (.getDocument db id VPackSlice)))
   ([^ArangoDatabase db ^Class as ^String id]
    (.getDocument db id as))
   ([^ArangoDatabase db ^DocumentReadOptions options ^Class as ^String id]
@@ -63,6 +67,16 @@
    (do (.createCollection db label (options/build CollectionCreateOptions options))
        (.collection db label))))
 
+(defn ensure-and-get-collection ^ArangoCollection
+  ([^ArangoDatabase db ^String label]
+   (if (collection-exists? db label)
+     (get-collection db label)
+     (create-and-get-collection db label)))
+  ([^ArangoDatabase db ^CollectionCreateOptions options ^String label]
+   (if (collection-exists? db label)
+     (get-collection db label)
+     (create-and-get-collection db options label))))
+
 (defn get-collections
   ;; returns a collection of CollectionEntity
   ([^ArangoDatabase db]
@@ -79,10 +93,6 @@
   [^ArangoDatabase db]
   (.getGraphs db))
 
-(defn collection-exists?
-  [^ArangoDatabase db label]
-  (some #(= label (.getName ^CollectionEntity %)) (.getCollections db)))
-
 (defn graph-exists? [^ArangoDatabase db label]
   (some #(= label (.getName ^GraphEntity %)) (.getGraphs db)))
 
@@ -94,16 +104,16 @@
   ^GraphEntity
   [^ArangoDatabase db
    ^GraphCreateOptions options
-   ^String label
-   ^java.util.Collection edge-definitions]
+   ^java.util.Collection edge-definitions
+   ^String label]
   (.createGraph db label
                 (map #(if (map? %) (graph/edge-definition %) %)
                      edge-definitions)
                 (options/build GraphCreateOptions options)))
 
 (defn graph ^ArangoGraph
-  ([^ArangoDatabase db ^String graph-name]
-   (.graph db graph-name)))
+  ([^ArangoDatabase db ^String label]
+   (.graph db label)))
 
 (def get-graph graph)
 
