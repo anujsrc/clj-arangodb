@@ -20,60 +20,77 @@
 
 (deftest cursor-count-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil {:count true} Integer)]
-      (is (= 5 (cursor/get-count res))))
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]])]
-      (is (= 5 (cursor/count res))))))
+    (is (= 5
+           (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                (d/query db {:count true} Integer)
+                cursor/get-count)
+           (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                (d/query db)
+                cursor/count)))))
 
 (deftest cursor-cache-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]])]
-      (is (= false (cursor/is-cached res))))))
+    (is (not (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                  (d/query db)
+                  cursor/is-cached)))))
 
 (deftest cursor-collect-into-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil nil Integer)
-          xs  (cursor/collect-into res (java.util.ArrayList.))]
-      (is (= [1 2 3 4 5] xs))
-      (testing "collect-into consumes the contents of the cursor"
-        (is (= false (cursor/has-next res)))))
-    (let [res (d/query db [:FOR ["x" [1 1 2 2 3]] [:RETURN "x"]] nil nil Integer)
-          xs  (cursor/collect-into res (java.util.HashSet.))]
-      (is (= #{1 2 3} xs)))))
+    (is (= [1 2 3 4 5]
+           (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                (d/query db Integer)
+                (cursor/collect-into (java.util.ArrayList.)))))
+    (testing "collect-into consumes the contents of the cursor"
+      (let [res (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                     (d/query db))]
+        (cursor/collect-into (java.util.ArrayList.) res)
+        (is (not (cursor/has-next res)))))
+    (testing "can collect-into a hash set and compare to a clojure set"
+      (is (= #{1 2 3}
+             (->> [:FOR ["x" [1 1 2 2 3]] [:RETURN "x"]]
+                  (d/query db)
+                  (cursor/collect-into (java.util.HashSet.))))))))
 
 (deftest cursor-seq-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil nil Integer)
-          xs  (seq res)]
+    (let [xs (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                  (d/query db Integer)
+                  seq)]
       (is (= (type xs) clojure.lang.LazySeq))
       (is (= [1 2 3 4 5] xs)))
     (testing "can map deserialize-doc"
-      (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]])
-            xs  (map adapter/deserialize-doc res)]
+      (let [xs (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                    (d/query db com.arangodb.velocypack.VPackSlice)
+                    (map adapter/deserialize-doc))]
         (is (= (type xs) clojure.lang.LazySeq))
-        (is (= [1 2 3 4 5] xs))))))
+        (is (= [1 2 3 4 5] xs))))
+    (testing "but getting as a default Object is going to give us numbers!"
+      (is (= [1 2 3 4 5]
+             (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                  (d/query db)
+                  seq))))))
 
 (deftest cursor-predicate-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil nil Integer)]
-      (is (= true (cursor/all-match res (partial >= 5))))
+    (let [curs (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                    (d/query db))]
+      (is (= true
+             (cursor/all-match (partial >= 5) curs)))
       (testing "can only test once"
-        (is (= false (cursor/all-match res nat-int?)))))))
+        (is (= false
+               (cursor/all-match nat-int? curs)))))))
 
 (deftest cursor-map-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil nil Integer)
-          xs (cursor/map res inc)]
-      (is (= [1 2 3 4 5] (seq res)))
-      (is (= nil (seq xs))))
-    (let [res (d/query db [:FOR ["x" "1..5"] [:RETURN "x"]] nil nil Integer)
-          xs (cursor/map res inc)]
-      (is (= [2 3 4 5 6] (seq xs)))
-      (is (= (seq res) nil)))    ))
+    (is (= [2 3 4 5 6]
+           (->> [:FOR ["x" "1..5"] [:RETURN "x"]]
+                (d/query db)
+                (cursor/map inc)
+                seq)))))
 
 (deftest cursor-first-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..3"] [:RETURN "x"]] nil nil Integer)]
+    (let [res (d/query db [:FOR ["x" "1..3"] [:RETURN "x"]])]
       (is (= 1 (cursor/first res)))
       (is (= 2 (cursor/first res)))
       (is (= 3 (cursor/first res)))
@@ -81,24 +98,21 @@
 
 (deftest cursor-foreach-test
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db [:FOR ["x" "1..3"] [:RETURN "x"]] nil nil Integer)
+    (let [res (->> [:FOR ["x" "1..3"] [:RETURN "x"]]
+                   (d/query db))
           state (atom 0)]
-      (cursor/foreach res (fn [x] (swap! state + x)))
+      (->> res
+           (cursor/foreach (fn [x] (swap! state + x))))
       (is (nil? (cursor/first res)))
       (is (= @state 6)))))
 
 (deftest multi-batch-tests
   (h/with-temp-db [db "testDB"]
-    (let [res (d/query db
-                       [:FOR ["x" "0..99"] [:RETURN "x"]]
-                       nil
-                       {:batchSize (int 5)}
-                       Integer)]
-      (is (= (range 100) (seq res))))
-    (let [res (d/query db
-                       [:FOR ["x" "1..3"] [:RETURN "x"]]
-                       nil
-                       {:batchSize (int 1)}
-                       Integer)]
-      (while (cursor/has-next res)
-        (is (nat-int? (cursor/next res)))))))
+    (is (= (range 100)
+           (->> [:FOR ["x" "0..99"] [:RETURN "x"]]
+                (d/query db {:batchSize (int 5)} Integer)
+                seq)))
+    (let [curs (->> [:FOR ["x" "0..10"] [:RETURN "x"]]
+                    (d/query db {:batchSize (int 2)} Integer))]
+      (while (cursor/has-next curs)
+        (is (nat-int? (cursor/next curs)))))))

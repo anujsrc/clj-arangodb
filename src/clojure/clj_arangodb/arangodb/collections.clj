@@ -12,6 +12,8 @@
    [com.arangodb.velocypack
     VPackSlice]
    [com.arangodb.entity
+    BaseDocument
+    BaseEdgeDocument
     CollectionEntity
     IndexEntity
     MultiDocumentEntity
@@ -108,15 +110,39 @@
 
 (defn get-document
   ([^ArangoCollection coll ^String key]
-   (adapter/deserialize-doc (.getDocument coll key adapter/*default-doc-class*)))
+   (adapter/deserialize-doc (.getDocument coll key VPackSlice)))
   ([^ArangoCollection coll ^Class as ^String key]
    (.getDocument coll key as))
   ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
    (.getDocument coll key as (options/build DocumentReadOptions options))))
 
+(defn get-json-document
+  ([coll key]
+   (adapter/deserialize-doc (get-document coll String key)))
+  ([coll options key]
+   (adapter/deserialize-doc (get-document coll options String key))))
+
+(defn get-object-document
+  ([coll key]
+   (adapter/deserialize-doc (get-document coll Object key)))
+  ([coll options key]
+   (adapter/deserialize-doc (get-document coll options Object key))))
+
+(defn get-base-document
+  ([coll key]
+   (adapter/deserialize-doc (get-document coll BaseDocument key)))
+  ([coll options key]
+   (adapter/deserialize-doc (get-document coll options BaseDocument key))))
+
+(defn get-base-edge-document
+  ([coll key]
+   (adapter/deserialize-doc (get-document coll BaseEdgeDocument key)))
+  ([coll options key]
+   (adapter/deserialize-doc (get-document coll options BaseEdgeDocument key))))
+
 (defn get-documents ^MultiDocumentEntity
   ([^ArangoCollection coll ^Collection keys]
-   (.getDocuments coll keys adapter/*default-doc-class*))
+   (.getDocuments coll keys VPackSlice))
   ([^ArangoCollection coll ^Class as ^Collection keys]
    (.getDocuments coll keys as)))
 

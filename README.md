@@ -132,9 +132,15 @@ Or java Maps (note that the keys are strings)
      (collections/insert-document coll))
 ```
 
-## Results
+## Entity Objects
 
 When we inserted our document the java driver returned an `DocumentCreateEntity` object.
+The namespace `clj-arangodb.arangodb.entity` provides utility functions for accessing fields and for converting them
+into clojure data structures.
+
+
+
+
 Until recently this library had chosen to **implicitly** convert these objects into clojure maps.
 While in many cases this was desirable - it is not always the case.
 For example consider the call
@@ -172,17 +178,20 @@ If the `database` is being used then an `id` must be provided, with a `collectio
 ```clojure
 (defn get-document
   ([^ArangoCollection coll ^String key]
-   (vpack/unpack (.getDocument coll key VPackSlice)))
+   (adapter/deserialize-doc (.getDocument coll key VPackSlice)))
   ([^ArangoCollection coll ^Class as ^String key]
    (.getDocument coll key as))
   ([^ArangoCollection coll ^DocumentReadOptions options ^Class as ^String key]
    (.getDocument coll key as (options/build DocumentReadOptions options))))
 ```
 
+If no class is passed then it defaults to deserialization using the `deserialize-doc` protocol for `VPackSlice`
+
 The interesting thing here is that the `class` of the deserialized document must be passed.
 If `String` is passed then the resulting document will be *JSON*, `VPackSlice` returns a *VPackSlice*
 
-Again if no class is passed then it defaults to deserialization using the `unpack` function in `clj-arangodb.velocypack.core`
+To make life a bit easier there are functions `get-base-document`, `get-json-document` etc that call `get-document` and deserialize under the hood.
+
 
 Lets assume that we have a `res` document from using the function `collections/insert-document`
 

@@ -6,6 +6,7 @@
             VPackSlice
             ValueType
             VPackBuilder]
+           clojure.lang.ILookup
            [com.arangodb.velocypack.exception
             VPackValueTypeException]))
 
@@ -282,3 +283,20 @@
   (some-> slice
           (slice-get-in ks nil)
           unpack))
+
+(defn unpack-into-base-doc
+  [^VPackSlice slice]
+  (let [len (long (.getLength slice))]
+    (loop [top (transient {})
+           params (transient {})
+           i (long 0)]
+      (if (== i len)
+        (persistent! (assoc! top :properties (persistent! params)))
+        (let [k (.getAsString (.keyAt slice i))]
+          (case k
+            "_key" (recur (assoc! top :key (.getAsString (.valueAt slice i))) params (inc i))
+            "_id"  (recur (assoc! top :id (.getAsString (.valueAt slice i))) params (inc i))
+            "_rev" (recur (assoc! top :revision (.getAsString (.valueAt slice i))) params (inc i))
+            (recur top (assoc! params
+                               (keyword k)
+                               (unpack keyword (.valueAt slice i))) (inc i))))))))

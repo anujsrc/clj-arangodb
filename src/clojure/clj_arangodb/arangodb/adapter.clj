@@ -9,8 +9,8 @@
             VPackSlice]
            [com.arangodb.entity
             Entity
-            MultiDocumentEntity
-            BaseDocument]))
+            BaseDocument
+            BaseEdgeDocument]))
 
 (defmulti double-quote-strings class)
 (defmethod double-quote-strings String
@@ -41,7 +41,6 @@
   nil
   (serialize-doc [_] nil))
 
-
 (defprotocol DeserializeDoc
   (deserialize-doc [data] ""))
 
@@ -49,7 +48,19 @@
   VPackSlice
   (deserialize-doc [data] (vpack/unpack data))
   BaseDocument
-  (deserialize-doc [data] (dissoc (bean data) :class))
+  (deserialize-doc [data]
+    {:key (.getKey data)
+     :id (.getId data)
+     :revision (.getRevision data)
+     :properties (into {} (.getProperties data))})
+  BaseEdgeDocument
+  (deserialize-doc [data]
+    {:key (.getKey data)
+     :id (.getId data)
+     :revision (.getRevision data)
+     :from (.getFrom data)
+     :to (.getTo data)
+     :properties (into {} (.getProperties data))})
   Object
   (deserialize-doc [data] data)
   nil

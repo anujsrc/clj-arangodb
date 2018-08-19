@@ -110,10 +110,10 @@
 (defn query ^ArangoCursor
   ;; can pass java.util.Map / java.util.List as well
   ([^ArangoDatabase db aql-query]
-   (query db aql-query nil nil VPackSlice))
+   (query db nil nil Object aql-query))
   ([^ArangoDatabase db ^Class as aql-query]
-   (query db aql-query nil nil as))
+   (query db nil nil as aql-query))
   ([^ArangoDatabase db ^AqlQueryOptions options ^Class as aql-query]
-   (query db aql-query nil options as))
+   (query db nil options as aql-query))
   ([^ArangoDatabase db bindvars ^AqlQueryOptions options ^Class as aql-query]
    (.query db ^String (aql/serialize aql-query) bindvars (options/build AqlQueryOptions options) as)))

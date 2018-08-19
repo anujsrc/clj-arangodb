@@ -34,25 +34,25 @@
 (defn first [^ArangoCursor cursor]
   (.first cursor))
 
-(defn foreach [^ArangoCursor cursor consume-fn]
+(defn foreach [consume-fn ^ArangoCursor cursor]
   (.forEach cursor (as-consumer consume-fn)))
 
-(defn map ^Iterable [^ArangoCursor cursor f]
+(defn map ^Iterable [f ^ArangoCursor cursor]
   (.map cursor (as-fn f)))
 
-(defn filter [^ArangoCursor cursor pred]
+(defn filter [pred ^ArangoCursor cursor]
   (.filter cursor (as-pred pred)))
 
-(defn any-match [^ArangoCursor cursor pred]
+(defn any-match [pred ^ArangoCursor cursor]
   (.anyMatch cursor (as-pred pred)))
 
-(defn all-match [^ArangoCursor cursor pred]
+(defn all-match [pred ^ArangoCursor cursor]
   (.allMatch cursor (as-pred pred)))
 
-(defn none-match [^ArangoCursor cursor pred]
+(defn none-match [pred ^ArangoCursor cursor]
   (.noneMatch cursor (as-pred pred)))
 
-(defn collect-into [^ArangoCursor cursor target]
+(defn collect-into [target ^ArangoCursor cursor]
   (.collectInto cursor target))
 
 (defn iterator [^ArangoCursor cursor]
@@ -70,10 +70,10 @@
 
 (defn get-stats ^CursorEntity$Stats
   [^ArangoCursor cursor]
-  (ad/from-entity ^CursorEntity$Stats (.getStats cursor)))
+  (.getStats cursor))
 
 (defn get-warnings [^ArangoCursor cursor]
-  (ad/from-entity (.getWarnings cursor)))
+  (.getWarnings cursor))
 
 (defn is-cached ^Boolean
   [^ArangoCursor cursor]
